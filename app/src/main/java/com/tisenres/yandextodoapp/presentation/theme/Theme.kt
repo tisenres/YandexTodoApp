@@ -1,4 +1,4 @@
-package com.tisenres.yandextodoapp.ui.theme
+package com.tisenres.yandextodoapp.presentation.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -24,7 +24,9 @@ private val LightColorScheme = lightColorScheme(
     surface = LightElevatedBackground,
     onSurface = LightPrimaryLabel,
     error = LightRed,
-    onError = LightWhite
+    onError = LightWhite,
+    surfaceVariant = LightSecondaryBackground,
+
 )
 
 private val DarkColorScheme = darkColorScheme(
@@ -41,7 +43,8 @@ private val DarkColorScheme = darkColorScheme(
     surface = DarkElevatedBackground,
     onSurface = DarkPrimaryLabel,
     error = DarkRed,
-    onError = DarkWhite
+    onError = DarkWhite,
+    surfaceVariant = DarkSecondaryBackground,
 )
 
 @Composable

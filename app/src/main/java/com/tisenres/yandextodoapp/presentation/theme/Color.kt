@@ -1,4 +1,4 @@
-package com.tisenres.yandextodoapp.ui.theme
+package com.tisenres.yandextodoapp.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 
