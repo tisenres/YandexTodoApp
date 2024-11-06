@@ -16,10 +16,16 @@ class TodoItemsRepositoryImpl @Inject constructor() : TodoItemsRepository {
 
     override fun getAllTodos(): Flow<List<TodoItem>> = items.asStateFlow()
 
-    override fun addTodoItem(item: TodoItem) {}
+    override suspend fun getTodoItemById(id: String): TodoItem? {
+        return items.value.find { it.id == id }
+    }
 
-    override fun deleteTodoItem(id: String) {
-        TODO("Not yet implemented")
+    override suspend fun updateTodoItem(item: TodoItem) {
+    }
+
+    override suspend fun addTodoItem(item: TodoItem) {}
+
+    override suspend fun deleteTodoItem(id: String) {
     }
 
     private fun generateMockData(): List<TodoItem> {
@@ -27,7 +33,7 @@ class TodoItemsRepositoryImpl @Inject constructor() : TodoItemsRepository {
             TodoItem(
                 id = UUID.randomUUID().toString(),
                 text = "Task ${it + 1}",
-                importance = Importance.HIGH,
+                importance = Importance.LOW,
                 isCompleted = false,
                 createdAt = Date()
             )

@@ -51,7 +51,9 @@ fun TodoListContent(
                 onClick = onCreateTaskClick,
                 containerColor = LocalExtendedColors.current.blue,
                 elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 8.dp),
-                modifier = Modifier.clip(CircleShape)
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .padding(bottom = 40.dp, end = 16.dp)
             ) {
                 Icon(
                     painter = painterResource(R.drawable.add),
@@ -149,11 +151,11 @@ fun TodoList(
                     text = item.text,
                     importance = item.importance,
                     isCompleted = item.isCompleted,
-                    onClick = { onTodoClick(item.id) }
+                    onClick = { onTodoClick(item.id) },
+                    onCheckedChange = {}
                 )
             }
         }
-        Spacer(modifier = Modifier.height(8.dp))
     }
 }
 

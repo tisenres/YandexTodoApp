@@ -28,108 +28,77 @@ fun TodoItemCell(
     text: String,
     importance: Importance,
     isCompleted: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
     onClick: () -> Unit
 ) {
     val checkboxColor = when {
-        isCompleted -> Color.Green
-        importance == Importance.HIGH -> Color.Red
-        else -> Color.Gray
+        isCompleted -> LocalExtendedColors.current.green
+        importance == Importance.HIGH -> LocalExtendedColors.current.red
+        else -> LocalExtendedColors.current.supportSeparator
     }
-    val textColor = if (isCompleted) LocalExtendedColors.current.supportSeparator else LocalExtendedColors.current.primaryLabel
+    val textColor = if (isCompleted) LocalExtendedColors.current.tertiaryLabel else LocalExtendedColors.current.primaryLabel
     val textDecoration = if (isCompleted) TextDecoration.LineThrough else null
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(vertical = 12.dp, horizontal = 16.dp)
+            .padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (isCompleted) {
-            Checkbox(
-                checked = true,
-                onCheckedChange = null,
-                modifier = Modifier.padding(end = 12.dp),
-                colors = CheckboxDefaults.colors(
-                    checkedColor = LocalExtendedColors.current.green,
-                    checkmarkColor = Color.White
-                )
+        Checkbox(
+            checked = isCompleted,
+            onCheckedChange = onCheckedChange,
+            modifier = Modifier
+                .padding(end = 12.dp),
+            colors = CheckboxDefaults.colors(
+                checkedColor = checkboxColor,
+                uncheckedColor = checkboxColor,
+                checkmarkColor = Color.White
             )
-        } else {
+        )
+
+        Row(
+            modifier = Modifier
+                .weight(1f)
+                .clickable(onClick = onClick),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             when (importance) {
                 Importance.HIGH -> {
-                    Checkbox(
-                        checked = false,
-                        onCheckedChange = null,
-                        modifier = Modifier
-                            .padding(end = 12.dp)
-                            .align(Alignment.CenterVertically),
-                        colors = CheckboxDefaults.colors(
-                            uncheckedColor = checkboxColor
-                        )
-                    )
                     Icon(
                         painter = painterResource(R.drawable.priority_high),
-                        contentDescription = "High Priority",
+                        contentDescription = "Высокий приоритет",
                         tint = Color.Red,
-                        modifier = Modifier
-                            .padding(end = 5.dp)
-                            .align(Alignment.CenterVertically)
+                        modifier = Modifier.padding(end = 7.dp)
                     )
                 }
                 Importance.LOW -> {
-                    Checkbox(
-                        checked = false,
-                        onCheckedChange = null,
-                        modifier = Modifier
-                            .padding(end = 12.dp)
-                            .align(Alignment.CenterVertically),
-                        colors = CheckboxDefaults.colors(
-                            uncheckedColor = checkboxColor
-                        )
-                    )
                     Icon(
                         painter = painterResource(R.drawable.priority_low),
-                        contentDescription = "Low Priority",
-                        tint = Color.Gray,
-                        modifier = Modifier
-                            .padding(end = 5.dp)
-                            .align(Alignment.CenterVertically)
-
+                        contentDescription = "Низкий приоритет",
+                        tint = LocalExtendedColors.current.gray,
+                        modifier = Modifier.padding(end = 7.dp)
                     )
                 }
-                else -> {
-                    Checkbox(
-                        checked = false,
-                        onCheckedChange = null,
-                        modifier = Modifier
-                            .padding(end = 12.dp)
-                            .align(Alignment.CenterVertically),
-                        colors = CheckboxDefaults.colors(
-                            uncheckedColor = checkboxColor
-                        )
-                    )
-                }
+                else -> {}
             }
+
+            Text(
+                text = text,
+                style = MaterialTheme.typography.bodyMedium,
+                color = textColor,
+                textDecoration = textDecoration,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis
+            )
         }
 
-        // Текст задачи
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodyLarge.copy(
-                color = textColor,
-                textDecoration = textDecoration
-            ),
-            modifier = Modifier.weight(1f),
-            maxLines = 3,
-            overflow = TextOverflow.Ellipsis
-        )
-
-        // Иконка "Подробнее"
         Icon(
             painter = painterResource(R.drawable.info_outline),
             contentDescription = "Подробнее о задаче",
             tint = LocalExtendedColors.current.tertiaryLabel,
-            modifier = Modifier.padding(start = 8.dp)
+            modifier = Modifier
+                .clickable(onClick = onClick)
         )
     }
 }
@@ -138,28 +107,44 @@ fun TodoItemCell(
 @Composable
 fun TodoItemCellPreview() {
     Column {
+        // Завершенная задача
         TodoItemCell(
             text = "Завершенная задача",
             importance = Importance.NORMAL,
             isCompleted = true,
+            onCheckedChange = {},
             onClick = {}
         )
+        // Задача с высоким приоритетом
         TodoItemCell(
-            text = "Задача с высоким приоритетом",
+            text = "Срочная задача с высоким приоритетом",
             importance = Importance.HIGH,
             isCompleted = false,
+            onCheckedChange = {},
             onClick = {}
         )
+        // Задача с обычным приоритетом
         TodoItemCell(
-            text = "Задача с обычным приоритетом",
+            text = "Обычная задача",
             importance = Importance.NORMAL,
             isCompleted = false,
+            onCheckedChange = {},
             onClick = {}
         )
+        // Задача с низким приоритетом
         TodoItemCell(
             text = "Задача с низким приоритетом",
             importance = Importance.LOW,
             isCompleted = false,
+            onCheckedChange = {},
+            onClick = {}
+        )
+        // Длинный текст задачи
+        TodoItemCell(
+            text = "Это очень длинный текст задачи, который должен быть ограничен тремя строками. Мы продолжаем писать, чтобы убедиться, что текст действительно обрезается после третьей строки и отображается многоточие в конце.",
+            importance = Importance.NORMAL,
+            isCompleted = false,
+            onCheckedChange = {},
             onClick = {}
         )
     }
