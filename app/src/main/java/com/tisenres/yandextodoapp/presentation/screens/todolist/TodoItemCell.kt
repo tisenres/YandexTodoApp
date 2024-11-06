@@ -42,6 +42,7 @@ fun TodoItemCell(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable(onClick = onClick)
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -59,8 +60,7 @@ fun TodoItemCell(
 
         Row(
             modifier = Modifier
-                .weight(1f)
-                .clickable(onClick = onClick),
+                .weight(1f),
             verticalAlignment = Alignment.CenterVertically
         ) {
             when (importance) {
@@ -97,8 +97,6 @@ fun TodoItemCell(
             painter = painterResource(R.drawable.info_outline),
             contentDescription = "Подробнее о задаче",
             tint = LocalExtendedColors.current.tertiaryLabel,
-            modifier = Modifier
-                .clickable(onClick = onClick)
         )
     }
 }

@@ -1,5 +1,6 @@
 package com.tisenres.yandextodoapp.presentation.screens.todolist
 
+import android.widget.Space
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -52,8 +53,8 @@ fun TodoListContent(
                 containerColor = LocalExtendedColors.current.blue,
                 elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 8.dp),
                 modifier = Modifier
+                    .padding(bottom = 24.dp, end = 16.dp)
                     .clip(CircleShape)
-                    .padding(bottom = 40.dp, end = 16.dp)
             ) {
                 Icon(
                     painter = painterResource(R.drawable.add),
@@ -66,13 +67,16 @@ fun TodoListContent(
     ) { paddingValues ->
         Column(
             modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxWidth()
+                .fillMaxSize()
+                .padding(horizontal = 8.dp)
+                .background(LocalExtendedColors.current.primaryBackground)
         ) {
             HeaderAndCompletedTasks(
                 completedTodos = tasks.count { it.isCompleted },
                 onEyeClick = {}
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             TodoList(
                 todos = tasks,
@@ -136,15 +140,16 @@ fun TodoList(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .background(LocalExtendedColors.current.secondaryBackground),
+            .padding(horizontal = 8.dp)
+            .clip(RoundedCornerShape(8.dp)),
         tonalElevation = 2.dp
     ) {
         Spacer(modifier = Modifier.height(8.dp))
         LazyColumn(
             contentPadding = PaddingValues(vertical = 8.dp),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(LocalExtendedColors.current.secondaryBackground)
         ) {
             items(todos) { item ->
                 TodoItemCell(
