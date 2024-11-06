@@ -8,10 +8,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -24,6 +26,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -44,7 +47,9 @@ fun TodoListScreen(
         tasks = todos.value,
         onTodoClick = onTodoClick,
         onCreateTaskClick = onCreateTaskClick,
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .background(LocalExtendedColors.current.primaryBackground)
     )
 }
 
@@ -59,12 +64,13 @@ fun TodoListContent(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onCreateTaskClick,
-                containerColor = MaterialTheme.colorScheme.primary
+                containerColor = LocalExtendedColors.current.blue,
+                modifier = Modifier.clip(CircleShape)
             ) {
                 Icon(
                     painter = painterResource(R.drawable.add),
                     contentDescription = "Add Task",
-                    tint = MaterialTheme.colorScheme.onPrimary
+                    tint = Color.White
                 )
             }
         },
@@ -94,12 +100,10 @@ fun HeaderAndCompletedTasks(
     onEyeClick: () -> Unit,
 ) {
 
-    val extendedColors = LocalExtendedColors.current
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 60.dp, top = 50.dp, end = 24.dp) // Adjust padding as needed
+            .padding(start = 60.dp, top = 50.dp, end = 24.dp)
     ) {
         Text(
             text = "Мои дела",
@@ -121,7 +125,7 @@ fun HeaderAndCompletedTasks(
             Spacer(modifier = Modifier.weight(1f))
             Icon(
                 painter = painterResource(R.drawable.visibility),
-                tint = LocalExtendedColors.current.blue, // Use customBlue here
+                tint = LocalExtendedColors.current.blue,
                 contentDescription = "Show Completed Tasks",
                 modifier = Modifier
                     .size(24.dp)
@@ -141,9 +145,10 @@ fun TodoList(
             .fillMaxWidth()
             .padding(16.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(MaterialTheme.colorScheme.surface),
+            .background(LocalExtendedColors.current.secondaryBackground),
         tonalElevation = 2.dp
     ) {
+        Spacer(modifier = Modifier.height(8.dp))
         LazyColumn(
             contentPadding = PaddingValues(vertical = 8.dp),
             modifier = Modifier
@@ -158,6 +163,7 @@ fun TodoList(
                 )
             }
         }
+        Spacer(modifier = Modifier.height(8.dp))
     }
 }
 
