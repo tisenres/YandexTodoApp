@@ -2,6 +2,7 @@ package com.tisenres.yandextodoapp.presentation.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
@@ -9,16 +10,24 @@ import androidx.compose.ui.text.googlefonts.GoogleFont
 import com.tisenres.yandextodoapp.R
 
 val robotoFamily = FontFamily(
-    androidx.compose.ui.text.googlefonts.Font(
-        googleFont = GoogleFont("Roboto"),
-        fontProvider = GoogleFont.Provider(
-            providerAuthority = "com.google.android.gms.fonts",
-            providerPackage = "com.google.android.gms",
-            certificates = R.array.com_google_android_gms_fonts_certs
-        ),
-        weight = FontWeight.Normal
-    )
+    Font(resId = R.font.roboto_regular, weight = FontWeight.Normal),
+    Font(resId = R.font.roboto_bold, weight = FontWeight.Bold),
+    Font(resId = R.font.roboto_black, weight = FontWeight.Black),
+    Font(resId = R.font.roboto_light, weight = FontWeight.Light),
+    Font(resId = R.font.roboto_medium, weight = FontWeight.Medium)
 )
+
+//val robotoFamily = FontFamily(
+//    androidx.compose.ui.text.googlefonts.Font(
+//        googleFont = GoogleFont("Roboto"),
+//        fontProvider = GoogleFont.Provider(
+//            providerAuthority = "com.google.android.gms.fonts",
+//            providerPackage = "com.google.android.gms",
+//            certificates = R.array.com_google_android_gms_fonts_certs
+//        ),
+//        weight = FontWeight.Normal
+//    )
+//)
 
 val Typography = Typography(
     titleLarge = TextStyle(

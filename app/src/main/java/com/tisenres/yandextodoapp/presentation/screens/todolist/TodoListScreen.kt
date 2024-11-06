@@ -4,9 +4,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.FloatingActionButton
@@ -27,6 +29,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.tisenres.yandextodoapp.R
 import com.tisenres.yandextodoapp.domain.entity.Importance
 import com.tisenres.yandextodoapp.domain.entity.TodoItem
+import com.tisenres.yandextodoapp.presentation.theme.LocalExtendedColors
 
 @Composable
 fun TodoListScreen(
@@ -89,33 +92,40 @@ fun HeaderAndCompletedTasks(
     completedTodos: Int,
     onEyeClick: () -> Unit,
 ) {
+
+    val extendedColors = LocalExtendedColors.current
+
     Column(
-        modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 60.dp, top = 50.dp, end = 24.dp) // Adjust padding as needed
     ) {
-        // Title
+        // Title text
         Text(
             text = "Мои дела",
             style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.secondary
+            color = MaterialTheme.colorScheme.primary
         )
-        // Completed count with icon
+
+        // Row with completed count and eye icon
         Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(top = 4.dp)
         ) {
             Text(
                 text = "Выполнено — $completedTodos",
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    color = MaterialTheme.colorScheme.onTertiary
-                )
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.tertiary,
             )
+            Spacer(modifier = Modifier.weight(1f))
             Icon(
                 painter = painterResource(R.drawable.visibility),
-                tint = MaterialTheme.colorScheme.primary, // or a custom color
+                tint = extendedColors.customBlue, // Use customBlue here
                 contentDescription = "Show Completed Tasks",
                 modifier = Modifier
-                    .padding(start = 8.dp)
+                    .size(24.dp)
                     .clickable(onClick = onEyeClick)
             )
         }
