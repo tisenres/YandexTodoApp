@@ -5,9 +5,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.tisenres.yandextodoapp.R
 import com.tisenres.yandextodoapp.domain.entity.Importance
@@ -85,4 +90,14 @@ fun ImportanceSelector(
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ImportanceSelectorPreview() {
+    var importance by remember { mutableStateOf(Importance.NORMAL) }
+    ImportanceSelector(
+        selectedImportance = importance,
+        onImportanceSelected = { importance = it }
+    )
 }

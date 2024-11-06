@@ -22,8 +22,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.tisenres.yandextodoapp.R
+import com.tisenres.yandextodoapp.domain.entity.Importance
 import com.tisenres.yandextodoapp.domain.entity.TodoItem
 import com.tisenres.yandextodoapp.presentation.theme.LocalExtendedColors
+import java.util.Date
 
 @Composable
 fun TodoListScreen(
@@ -261,8 +263,51 @@ fun newTaskRow(onCreateTodoClick: () -> Unit) {
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-fun TodoListScreenPreview() {
+fun HeaderAndCompletedTodosPreview() {
+    HeaderAndCompletedTodos(
+        completedTodos = 5,
+        onEyeClick = {}
+    )
+}
 
+@Preview(showBackground = true)
+@Composable
+fun NewTaskRowPreview() {
+    newTaskRow(onCreateTodoClick = {})
+}
+
+@Preview(showBackground = true)
+@Composable
+fun TodoListPreview() {
+    val sampleTodos = listOf(
+        TodoItem(id = "1", text = "Задача 1", importance = Importance.NORMAL, isCompleted = false, createdAt = Date()),
+        TodoItem(id = "2", text = "Задача 2", importance = Importance.HIGH, isCompleted = true, createdAt = Date()),
+        TodoItem(id = "3", text = "Задача 3", importance = Importance.LOW, isCompleted = false, createdAt = Date())
+    )
+    TodoList(
+        todos = sampleTodos,
+        onTodoClick = {},
+        onCompleteTodo = {},
+        onCreateTodoClick = {},
+        onDeleteTodo = {}
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun TodoListContentPreview() {
+    val sampleTodos = listOf(
+        TodoItem(id = "1", text = "Задача 1", importance = Importance.NORMAL, isCompleted = false, createdAt = Date()),
+        TodoItem(id = "2", text = "Задача 2", importance = Importance.HIGH, isCompleted = true, createdAt = Date()),
+        TodoItem(id = "3", text = "Задача 3", importance = Importance.LOW, isCompleted = false, createdAt = Date())
+    )
+    TodoListContent(
+        todos = sampleTodos,
+        onTodoClick = {},
+        onCreateTodoClick = {},
+        onCompleteTodo = {},
+        onDeleteTodo = {}
+    )
 }

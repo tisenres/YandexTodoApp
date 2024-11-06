@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.tisenres.yandextodoapp.R
 import com.tisenres.yandextodoapp.domain.entity.Importance
@@ -196,5 +197,21 @@ fun TodoDetailsScreen(
                 }
             }
         }
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun TodoDetailsScreenPreview() {
+    TodoDetailsScreen(
+        initialText = "Купить продукты",
+        initialImportance = Importance.HIGH,
+        initialDeadline = Calendar.getInstance().apply {
+            add(Calendar.DAY_OF_MONTH, 3)
+        }.time,
+        isEditing = true,
+        onSaveClick = { _, _, _ -> },
+        onDeleteClick = {},
+        onCloseClick = {}
     )
 }
