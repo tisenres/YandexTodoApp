@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             YandexTodoAppTheme {
                 val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = "tasks") {
+                NavHost(navController = navController, startDestination = "taskList") {
                     composable("taskList") {
                         val viewModel = hiltViewModel<TodoListViewModel>()
                         TodoListScreen(
@@ -36,6 +36,9 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("taskDetails/{taskId}") {
 
+                    }
+
+                    composable("createTask") {
                     }
                 }
             }

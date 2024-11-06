@@ -11,60 +11,47 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
-
 import androidx.compose.ui.graphics.Color
 
 data class ExtendedColors(
-    val customBlue: Color,
-    val customRed: Color,
+    val primaryBackground: Color,
+    val secondaryBackground: Color,
+    val elevatedBackground: Color,
+    val primaryLabel: Color,
+    val secondaryLabel: Color,
+    val error: Color,
+    val overlay: Color,
+    val tertiaryLabel: Color,
+    val blue: Color,
+    val supportSeparator: Color
 )
 
 // Light and Dark custom colors
 val LightExtendedColors = ExtendedColors(
-    customBlue = LightBlue,
-    customRed = LightRed
+    primaryBackground = LightPrimaryBackground,
+    secondaryBackground = LightSecondaryBackground,
+    elevatedBackground = LightElevatedBackground,
+    primaryLabel = LightPrimaryLabel,
+    secondaryLabel = LightSecondaryLabel,
+    error = LightRed,
+    overlay = LightOverlay,
+    tertiaryLabel = LightTertiaryLabel,
+    blue = LightBlue,
+    supportSeparator = LightSeparator
 )
 
 val DarkExtendedColors = ExtendedColors(
-    customBlue = DarkBlue,
-    customRed = DarkRed
-)
-
-
-private val LightColorScheme = lightColorScheme(
-    primary = LightPrimaryLabel,
-    onPrimary = LightWhite,
-    primaryContainer = LightPrimaryBackground,
-    onPrimaryContainer = LightSecondaryLabel,
-    secondary = LightSecondaryLabel,
-    onSecondary = LightPrimaryLabel,
-    tertiary = LightTertiaryLabel,
-    onTertiary = LightPrimaryLabel,
-    background = LightPrimaryBackground,
-    onBackground = LightPrimaryLabel,
-    surface = LightElevatedBackground,
-    onSurface = LightPrimaryLabel,
-    error = LightRed,
-    onError = LightWhite,
-    surfaceVariant = LightSecondaryBackground,
-)
-
-private val DarkColorScheme = darkColorScheme(
-    primary = DarkPrimaryLabel,
-    onPrimary = DarkWhite,
-    primaryContainer = DarkPrimaryBackground,
-    onPrimaryContainer = DarkSecondaryLabel,
-    secondary = DarkSecondaryLabel,
-    onSecondary = DarkPrimaryLabel,
-    tertiary = DarkTertiaryLabel,
-    onTertiary = DarkPrimaryLabel,
-    background = DarkPrimaryBackground,
-    onBackground = DarkPrimaryLabel,
-    surface = DarkElevatedBackground,
-    onSurface = DarkPrimaryLabel,
+    primaryBackground = DarkPrimaryBackground,
+    secondaryBackground = DarkSecondaryBackground,
+    elevatedBackground = DarkElevatedBackground,
+    primaryLabel = DarkPrimaryLabel,
+    secondaryLabel = DarkSecondaryLabel,
     error = DarkRed,
-    onError = DarkWhite,
-    surfaceVariant = DarkSecondaryBackground,
+    overlay = DarkOverlay,
+    tertiaryLabel = DarkTertiaryLabel,
+    blue = DarkBlue,
+    supportSeparator = DarkSeparator
+
 )
 
 val LocalExtendedColors = staticCompositionLocalOf { LightExtendedColors }
@@ -80,8 +67,16 @@ fun YandexTodoAppTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        darkTheme -> darkColorScheme(
+            background = DarkPrimaryBackground,
+            surface = DarkElevatedBackground
+            // other material color definitions if needed
+        )
+        else -> lightColorScheme(
+            background = LightPrimaryBackground,
+            surface = LightElevatedBackground
+            // other material color definitions if needed
+        )
     }
 
     val extendedColors = if (darkTheme) DarkExtendedColors else LightExtendedColors

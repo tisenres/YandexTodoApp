@@ -6,21 +6,28 @@ import com.tisenres.yandextodoapp.domain.entity.TodoItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class TodoListViewModel @Inject constructor(
     private val todoListModel: TodoListModel
-): ViewModel() {
+) : ViewModel() {
 
     private val _todos: MutableStateFlow<List<TodoItem>> = MutableStateFlow(emptyList())
-    val todos: StateFlow<List<TodoItem>> = _todos
+    val todos: StateFlow<List<TodoItem>> = _todos.asStateFlow()
+
+    init {
+        getAllTodos()
+    }
 
     private fun getAllTodos() {
         viewModelScope.launch {
-            todoListModel.getAllTodos()
+            todoListModel.getAllTodos().collect { todosList ->
+                _todos.value = todosList
+            }
         }
     }
-
 }
+
