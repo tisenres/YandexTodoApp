@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.util.Date
+import java.util.Random
 import java.util.UUID
 import javax.inject.Inject
 
@@ -33,7 +34,7 @@ class TodoItemsRepositoryImpl @Inject constructor() : TodoItemsRepository {
             TodoItem(
                 id = UUID.randomUUID().toString(),
                 text = "Task ${it + 1}",
-                importance = Importance.LOW,
+                importance = Importance.entries[Random().nextInt(3)],
                 isCompleted = false,
                 createdAt = Date()
             )

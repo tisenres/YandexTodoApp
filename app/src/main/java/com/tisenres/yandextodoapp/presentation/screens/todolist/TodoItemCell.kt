@@ -43,7 +43,7 @@ fun TodoItemCell(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Checkbox(
@@ -67,7 +67,7 @@ fun TodoItemCell(
                 Importance.HIGH -> {
                     Icon(
                         painter = painterResource(R.drawable.priority_high),
-                        contentDescription = "Высокий приоритет",
+                        contentDescription = "High Priority",
                         tint = Color.Red,
                         modifier = Modifier.padding(end = 7.dp)
                     )
@@ -75,7 +75,7 @@ fun TodoItemCell(
                 Importance.LOW -> {
                     Icon(
                         painter = painterResource(R.drawable.priority_low),
-                        contentDescription = "Низкий приоритет",
+                        contentDescription = "Low Priority",
                         tint = LocalExtendedColors.current.gray,
                         modifier = Modifier.padding(end = 7.dp)
                     )
@@ -95,7 +95,7 @@ fun TodoItemCell(
 
         Icon(
             painter = painterResource(R.drawable.info_outline),
-            contentDescription = "Подробнее о задаче",
+            contentDescription = "More Details",
             tint = LocalExtendedColors.current.tertiaryLabel,
         )
     }
