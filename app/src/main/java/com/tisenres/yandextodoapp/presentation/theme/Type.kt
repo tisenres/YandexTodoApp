@@ -21,19 +21,19 @@ val robotoFamily = FontFamily(
 )
 
 val Typography = Typography(
-    displayLarge = TextStyle(
+    titleLarge = TextStyle(
         fontFamily = robotoFamily,
         fontWeight = FontWeight.Bold,
         fontSize = 32.sp,
         lineHeight = 38.sp
     ),
-    headlineMedium = TextStyle(
+    titleMedium = TextStyle(
         fontFamily = robotoFamily,
-        fontWeight = FontWeight.Medium,
+        fontWeight = FontWeight.Bold,
         fontSize = 20.sp,
         lineHeight = 32.sp
     ),
-    labelLarge = TextStyle(
+    labelSmall = TextStyle(
         fontFamily = robotoFamily,
         fontWeight = FontWeight.Bold,
         fontSize = 14.sp,

@@ -14,8 +14,8 @@ class TodoListViewModel @Inject constructor(
     private val todoListModel: TodoListModel
 ): ViewModel() {
 
-    private val _tasks: MutableStateFlow<List<TodoItem>> = MutableStateFlow(emptyList())
-    val tasks: StateFlow<List<TodoItem>> = _tasks
+    private val _todos: MutableStateFlow<List<TodoItem>> = MutableStateFlow(emptyList())
+    val todos: StateFlow<List<TodoItem>> = _todos
 
     private fun getAllTodos() {
         viewModelScope.launch {

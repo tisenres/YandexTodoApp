@@ -8,10 +8,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.tisenres.yandextodoapp.presentation.screens.todolist.TaskListScreen
+import com.tisenres.yandextodoapp.presentation.screens.todolist.TodoListScreen
 import com.tisenres.yandextodoapp.presentation.screens.todolist.TodoListViewModel
 import com.tisenres.yandextodoapp.presentation.theme.YandexTodoAppTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,9 +24,9 @@ class MainActivity : ComponentActivity() {
                 NavHost(navController = navController, startDestination = "tasks") {
                     composable("taskList") {
                         val viewModel = hiltViewModel<TodoListViewModel>()
-                        TaskListScreen(
+                        TodoListScreen(
                             viewModel,
-                            onTaskClick = { taskId ->
+                            onTodoClick = { taskId ->
                                 navController.navigate("taskDetails/$taskId")
                             },
                             onCreateTaskClick = {

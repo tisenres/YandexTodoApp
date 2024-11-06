@@ -84,7 +84,7 @@ dependencies {
     kapt(libs.hiltCompilerAndroidX)
     implementation(libs.hiltNavigationCompose)
 
-    // Image loading with Coil
+     // Image loading with Coil
     implementation(libs.coil)
 
     // Networking with Retrofit and OkHttp
