@@ -1,6 +1,5 @@
 package com.tisenres.yandextodoapp.presentation.screens.tododetails
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -8,7 +7,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
@@ -103,7 +101,7 @@ fun TodoDetailsScreen(
                 ) {
                     Text(
                         text = "Важность",
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodyLarge,
                         color = LocalExtendedColors.current.primaryLabel,
                     )
                     Spacer(modifier = Modifier.weight(1f))
@@ -173,23 +171,25 @@ fun TodoDetailsScreen(
                             .padding(vertical = 12.dp),
                         horizontalArrangement = Arrangement.Start
                     ) {
+                        val isDeleteEnabled = text.text.isNotEmpty()
                         TextButton(
                             onClick = onDeleteClick,
+                            enabled = isDeleteEnabled,
                             colors = ButtonDefaults.textButtonColors(
-                                contentColor = Color.Red
+                                contentColor = if (isDeleteEnabled) Color.Red else LocalExtendedColors.current.disableLabel
                             )
                         ) {
                             Icon(
                                 painter = painterResource(R.drawable.delete),
                                 contentDescription = "Удалить",
                                 modifier = Modifier.size(24.dp),
-                                tint = Color.Red
+                                tint = if (isDeleteEnabled) Color.Red else LocalExtendedColors.current.disableLabel
                             )
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(
                                 text = "Удалить",
                                 style = MaterialTheme.typography.bodyLarge,
-                                color = Color.Red
+                                color = if (isDeleteEnabled) Color.Red else LocalExtendedColors.current.disableLabel
                             )
                         }
                     }

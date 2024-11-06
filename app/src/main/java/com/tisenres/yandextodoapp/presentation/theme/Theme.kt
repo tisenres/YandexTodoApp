@@ -27,7 +27,8 @@ data class ExtendedColors(
     val red: Color,
     val gray: Color,
     val supportSeparator: Color,
-    val disableLabel: Color
+    val disableLabel: Color,
+    val supportOverlay: Color
 )
 
 // Light and Dark custom colors
@@ -45,7 +46,8 @@ val LightExtendedColors = ExtendedColors(
     red = LightRed,
     gray = LightGray,
     supportSeparator = LightSeparator,
-    disableLabel = LightDisableLabel
+    disableLabel = LightDisableLabel,
+    supportOverlay = LightOverlay
 )
 
 val DarkExtendedColors = ExtendedColors(
@@ -62,7 +64,8 @@ val DarkExtendedColors = ExtendedColors(
     red = DarkRed,
     gray = DarkGray,
     supportSeparator = DarkSeparator,
-    disableLabel = DarkDisableLabel
+    disableLabel = DarkDisableLabel,
+    supportOverlay = DarkOverlay
 
 )
 

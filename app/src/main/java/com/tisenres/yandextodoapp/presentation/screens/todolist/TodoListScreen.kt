@@ -53,7 +53,8 @@ fun TodoListContent(
                 containerColor = LocalExtendedColors.current.blue,
                 elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 8.dp),
                 modifier = Modifier
-                    .padding(bottom = 24.dp, end = 16.dp)
+                    .size(56.dp)
+                    .padding(bottom = 16.dp, end = 16.dp)
                     .clip(CircleShape)
             ) {
                 Icon(
