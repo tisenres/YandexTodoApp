@@ -85,12 +85,10 @@ fun YandexTodoAppTheme(
         darkTheme -> darkColorScheme(
             background = DarkPrimaryBackground,
             surface = DarkElevatedBackground
-            // other material color definitions if needed
         )
         else -> lightColorScheme(
             background = LightPrimaryBackground,
             surface = LightElevatedBackground
-            // other material color definitions if needed
         )
     }
 

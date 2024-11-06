@@ -30,5 +30,19 @@ class TodoListViewModel @Inject constructor(
             }
         }
     }
+
+    fun completeTodo(todoId: String) {
+        _todos.value = _todos.value.map { todo ->
+            if (todo.id == todoId) {
+                todo.copy(isCompleted = true)
+            } else {
+                todo
+            }
+        }
+    }
+
+    fun deleteTodo(todoId: String) {
+        _todos.value = todos.value.filterNot { it.id == todoId }
+    }
 }
 

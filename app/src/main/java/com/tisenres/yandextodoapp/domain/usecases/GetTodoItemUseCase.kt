@@ -7,7 +7,7 @@ import javax.inject.Inject
 class GetTodoItemUseCase @Inject constructor(
     private val repository: TodoItemsRepository
 ) {
-    suspend operator fun invoke(taskId: String): TodoItem? {
-        return repository.getTodoItemById(taskId)
+    suspend operator fun invoke(todoId: String): TodoItem? {
+        return repository.getTodoItemById(todoId)
     }
 }

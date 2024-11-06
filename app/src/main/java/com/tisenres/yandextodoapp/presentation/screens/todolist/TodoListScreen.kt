@@ -1,18 +1,22 @@
 package com.tisenres.yandextodoapp.presentation.screens.todolist
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key.Companion.F
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -25,42 +29,41 @@ import com.tisenres.yandextodoapp.presentation.theme.LocalExtendedColors
 fun TodoListScreen(
     viewModel: TodoListViewModel = hiltViewModel(),
     onTodoClick: (String) -> Unit,
-    onCreateTaskClick: () -> Unit
+    onCreateTodoClick: () -> Unit
 ) {
-    val todos = viewModel.todos.collectAsState()
-
+    val todos by viewModel.todos.collectAsState()
+F
     TodoListContent(
-        tasks = todos.value,
+        todos = todos,
         onTodoClick = onTodoClick,
-        onCreateTaskClick = onCreateTaskClick,
-        modifier = Modifier
-            .fillMaxSize()
+        onCreateTodoClick = onCreateTodoClick,
+        onCompleteTodo = { todoId -> viewModel.completeTodo(todoId) },
+        onDeleteTodo = { todoId -> viewModel.deleteTodo(todoId) },
+        modifier = Modifier.fillMaxSize()
     )
 }
 
 @Composable
 fun TodoListContent(
-    tasks: List<TodoItem>,
+    todos: List<TodoItem>,
     onTodoClick: (String) -> Unit,
-    onCreateTaskClick: () -> Unit,
+    onCreateTodoClick: () -> Unit,
+    onCompleteTodo: (String) -> Unit,
+    onDeleteTodo: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
-                onClick = onCreateTaskClick,
+                onClick = onCreateTodoClick,
                 containerColor = LocalExtendedColors.current.blue,
-                elevation = FloatingActionButtonDefaults.elevation(
-                    defaultElevation = 6.dp,
-                    pressedElevation = 8.dp,
-                ),
+                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 6.dp),
                 modifier = Modifier
                     .padding(bottom = 16.dp, end = 16.dp)
-                    .clip(CircleShape)
             ) {
                 Icon(
                     painter = painterResource(R.drawable.add),
-                    contentDescription = "Add Task",
+                    contentDescription = "Add Todo",
                     tint = Color.White
                 )
             }
@@ -73,23 +76,26 @@ fun TodoListContent(
                 .padding(paddingValues)
                 .background(LocalExtendedColors.current.primaryBackground)
         ) {
-            HeaderAndCompletedTasks(
-                completedTodos = tasks.count { it.isCompleted },
+            HeaderAndCompletedTodos(
+                completedTodos = todos.count { it.isCompleted },
                 onEyeClick = {}
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             TodoList(
-                todos = tasks,
-                onTodoClick = onTodoClick
+                todos = todos,
+                onTodoClick = onTodoClick,
+                onCompleteTodo = onCompleteTodo,
+                onDeleteTodo = onDeleteTodo,
+                modifier = Modifier.weight(1f),
             )
         }
     }
 }
 
 @Composable
-fun HeaderAndCompletedTasks(
+fun HeaderAndCompletedTodos(
     completedTodos: Int,
     onEyeClick: () -> Unit,
 ) {
@@ -121,7 +127,7 @@ fun HeaderAndCompletedTasks(
             Icon(
                 painter = painterResource(if (isVisible) R.drawable.visibility else R.drawable.visibility_off),
                 tint = LocalExtendedColors.current.blue,
-                contentDescription = if (isVisible) "Hide Completed Tasks" else "Show Completed Tasks",
+                contentDescription = if (isVisible) "Hide Completed Todos" else "Show Completed Todos",
                 modifier = Modifier
                     .size(24.dp)
                     .clip(CircleShape)
@@ -138,29 +144,93 @@ fun HeaderAndCompletedTasks(
 fun TodoList(
     todos: List<TodoItem>,
     onTodoClick: (String) -> Unit,
+    onCompleteTodo: (String) -> Unit,
+    onDeleteTodo: (String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    Surface(
-        modifier = Modifier
+    LazyColumn(
+        contentPadding = PaddingValues(vertical = 8.dp),
+        modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp)
-            .clip(RoundedCornerShape(8.dp)),
-        tonalElevation = 2.dp
+            .background(LocalExtendedColors.current.secondaryBackground)
     ) {
-        Spacer(modifier = Modifier.height(8.dp))
-        LazyColumn(
-            contentPadding = PaddingValues(vertical = 8.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(LocalExtendedColors.current.secondaryBackground)
-        ) {
-            items(todos) { item ->
-                TodoItemCell(
-                    text = item.text,
-                    importance = item.importance,
-                    isCompleted = item.isCompleted,
-                    onClick = { onTodoClick(item.id) },
-                    onCheckedChange = {}
-                )
+        items(
+            items = todos,
+            key = { it.id }
+        ) { item ->
+            val swipeState = rememberSwipeToDismissBoxState()
+
+            SwipeToDismissBox(
+                state = swipeState,
+                modifier = Modifier.animateContentSize(),
+                backgroundContent = {
+                    val dismissDirection = swipeState.dismissDirection
+                    val (icon, alignment, color) = when (dismissDirection) {
+                        SwipeToDismissBoxValue.EndToStart -> {
+                            Triple(
+                                Icons.Filled.Delete,
+                                Alignment.CenterEnd,
+                                LocalExtendedColors.current.error
+                            )
+                        }
+
+                        SwipeToDismissBoxValue.StartToEnd -> {
+                            Triple(
+                                Icons.Filled.Done,
+                                Alignment.CenterStart,
+                                LocalExtendedColors.current.green
+                            )
+                        }
+
+                        else -> {
+                            Triple(null, Alignment.Center, Color.Transparent)
+                        }
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(color)
+                            .padding(horizontal = 20.dp),
+                        contentAlignment = alignment
+                    ) {
+                        if (icon != null) {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = null,
+                                tint = Color.White
+                            )
+                        }
+                    }
+                },
+                content = {
+                    TodoItemCell(
+                        text = item.text,
+                        importance = item.importance,
+                        isCompleted = item.isCompleted,
+                        onClick = { onTodoClick(item.id) },
+                        onCheckedChange = {}
+                    )
+                }
+            )
+
+            when (swipeState.currentValue) {
+                SwipeToDismissBoxValue.EndToStart -> {
+                    LaunchedEffect(Unit) {
+                        onDeleteTodo(item.id)
+                    }
+                }
+
+                SwipeToDismissBoxValue.StartToEnd -> {
+                    LaunchedEffect(Unit) {
+                        onCompleteTodo(item.id)
+                        swipeState.snapTo(SwipeToDismissBoxValue.Settled)
+                    }
+                }
+
+                else -> {
+
+                }
             }
         }
     }
@@ -169,5 +239,5 @@ fun TodoList(
 @Preview
 @Composable
 fun TodoListScreenPreview() {
-    // Provide your preview here
+
 }

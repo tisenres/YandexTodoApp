@@ -33,7 +33,7 @@ class TodoItemsRepositoryImpl @Inject constructor() : TodoItemsRepository {
         return List(20) {
             TodoItem(
                 id = UUID.randomUUID().toString(),
-                text = "Task ${it + 1}",
+                text = "Todo ${it + 1}",
                 importance = Importance.entries[Random().nextInt(3)],
                 isCompleted = false,
                 createdAt = Date()

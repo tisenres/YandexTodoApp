@@ -25,38 +25,38 @@ class MainActivity : ComponentActivity() {
         setContent {
             YandexTodoAppTheme {
                 val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = "taskList") {
-                    composable("taskList") {
+                NavHost(navController = navController, startDestination = "todoList") {
+                    composable("todoList") {
                         TodoListScreen(
-                            onTodoClick = { taskId ->
-                                navController.navigate("taskDetails/$taskId")
+                            onTodoClick = { todoId ->
+                                navController.navigate("todoDetails/$todoId")
                             },
-                            onCreateTaskClick = {
-                                navController.navigate("createTask")
+                            onCreateTodoClick = {
+                                navController.navigate("createTodo")
                             }
                         )
                     }
                     composable(
-                        "taskDetails/{taskId}",
-                        arguments = listOf(navArgument("taskId") { type = NavType.StringType })
+                        "todoDetails/{todoId}",
+                        arguments = listOf(navArgument("todoId") { type = NavType.StringType })
                     ) { backStackEntry ->
-                        val taskId = backStackEntry.arguments?.getString("taskId") ?: return@composable
+                        val todoId = backStackEntry.arguments?.getString("todoId") ?: return@composable
                         val viewModel = hiltViewModel<TodoDetailsViewModel>()
-                        viewModel.loadTask(taskId)
+                        viewModel.loadTodo(todoId)
 
-                        val taskState by viewModel.task.collectAsState()
+                        val todoState by viewModel.todo.collectAsState()
 
                         TodoDetailsScreen(
-                            initialText = taskState?.text ?: "",
-                            initialImportance = taskState?.importance ?: Importance.NORMAL,
-                            initialDeadline = taskState?.deadline,
+                            initialText = todoState?.text ?: "",
+                            initialImportance = todoState?.importance ?: Importance.NORMAL,
+                            initialDeadline = todoState?.deadline,
                             isEditing = true,
                             onSaveClick = { text, importance, deadline ->
-                                viewModel.updateTask(taskId, text, importance, deadline)
+                                viewModel.updateTodo(todoId, text, importance, deadline)
                                 navController.popBackStack()
                             },
                             onDeleteClick = {
-                                viewModel.deleteTask(taskId)
+                                viewModel.deleteTodo(todoId)
                                 navController.popBackStack()
                             },
                             onCloseClick = {
@@ -65,12 +65,12 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    composable("createTask") {
+                    composable("createTodo") {
                         val viewModel = hiltViewModel<TodoDetailsViewModel>()
 
                         TodoDetailsScreen(
                             onSaveClick = { text, importance, deadline ->
-                                viewModel.createTask(text, importance, deadline)
+                                viewModel.createTodo(text, importance, deadline)
                                 navController.popBackStack()
                             },
                             onDeleteClick = {

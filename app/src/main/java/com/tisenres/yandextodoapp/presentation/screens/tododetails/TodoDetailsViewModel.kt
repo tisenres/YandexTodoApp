@@ -23,19 +23,19 @@ class TodoDetailsViewModel @Inject constructor(
     private val deleteTodoItemUseCase: DeleteTodoItemUseCase
 ) : ViewModel() {
 
-    private val _task = MutableStateFlow<TodoItem?>(null)
-    val task: StateFlow<TodoItem?> = _task
+    private val _todo = MutableStateFlow<TodoItem?>(null)
+    val todo: StateFlow<TodoItem?> = _todo
 
-    fun loadTask(taskId: String) {
+    fun loadTodo(todoId: String) {
         viewModelScope.launch {
-            val loadedTask = getTodoItemUseCase(taskId)
-            _task.value = loadedTask
+            val loadedTodo = getTodoItemUseCase(todoId)
+            _todo.value = loadedTodo
         }
     }
 
-    fun createTask(text: String, importance: Importance, deadline: Date?) {
+    fun createTodo(text: String, importance: Importance, deadline: Date?) {
         viewModelScope.launch {
-            val newTask = TodoItem(
+            val newTodo = TodoItem(
                 id = UUID.randomUUID().toString(),
                 text = text,
                 importance = importance,
@@ -44,28 +44,28 @@ class TodoDetailsViewModel @Inject constructor(
                 createdAt = Date(),
                 modifiedAt = null
             )
-            addTodoItemUseCase(newTask)
+            addTodoItemUseCase(newTodo)
         }
     }
 
-    fun updateTask(taskId: String, text: String, importance: Importance, deadline: Date?) {
+    fun updateTodo(todoId: String, text: String, importance: Importance, deadline: Date?) {
         viewModelScope.launch {
-            val currentTask = _task.value
-            if (currentTask != null) {
-                val updatedTask = currentTask.copy(
+            val currentTodo = _todo.value
+            if (currentTodo != null) {
+                val updatedTodo = currentTodo.copy(
                     text = text,
                     importance = importance,
                     deadline = deadline,
                     modifiedAt = Date()
                 )
-                updateTodoItemUseCase(updatedTask)
+                updateTodoItemUseCase(updatedTodo)
             }
         }
     }
 
-    fun deleteTask(taskId: String) {
+    fun deleteTodo(todoId: String) {
         viewModelScope.launch {
-            deleteTodoItemUseCase(taskId)
+            deleteTodoItemUseCase(todoId)
         }
     }
 }
