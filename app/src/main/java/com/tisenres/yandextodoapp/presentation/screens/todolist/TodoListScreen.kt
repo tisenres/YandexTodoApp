@@ -16,8 +16,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.key.Key.Companion.F
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -32,7 +32,7 @@ fun TodoListScreen(
     onCreateTodoClick: () -> Unit
 ) {
     val todos by viewModel.todos.collectAsState()
-F
+
     TodoListContent(
         todos = todos,
         onTodoClick = onTodoClick,
@@ -87,6 +87,7 @@ fun TodoListContent(
                 todos = todos,
                 onTodoClick = onTodoClick,
                 onCompleteTodo = onCompleteTodo,
+                onCreateTodoClick = onCreateTodoClick,
                 onDeleteTodo = onDeleteTodo,
                 modifier = Modifier.weight(1f),
             )
@@ -145,6 +146,7 @@ fun TodoList(
     todos: List<TodoItem>,
     onTodoClick: (String) -> Unit,
     onCompleteTodo: (String) -> Unit,
+    onCreateTodoClick: () -> Unit,
     onDeleteTodo: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -233,6 +235,29 @@ fun TodoList(
                 }
             }
         }
+
+        item {
+            newTaskRow(onCreateTodoClick = onCreateTodoClick)
+        }
+    }
+}
+
+@Composable
+fun newTaskRow(onCreateTodoClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onCreateTodoClick() }
+            .padding(horizontal = 80.dp, vertical = 15.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = "Новое",
+            style = MaterialTheme.typography.bodyLarge,
+            color = LocalExtendedColors.current.tertiaryLabel,
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
 }
 
