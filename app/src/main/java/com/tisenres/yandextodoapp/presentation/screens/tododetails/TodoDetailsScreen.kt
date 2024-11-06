@@ -1,11 +1,15 @@
 package com.tisenres.yandextodoapp.presentation.screens.tododetails
 
+import android.widget.Space
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
@@ -14,6 +18,7 @@ import com.tisenres.yandextodoapp.R
 import com.tisenres.yandextodoapp.domain.entity.Importance
 import com.tisenres.yandextodoapp.presentation.screens.tododetails.components.CustomDatePickerDialog
 import com.tisenres.yandextodoapp.presentation.screens.tododetails.components.ImportanceSelector
+import com.tisenres.yandextodoapp.presentation.theme.LocalExtendedColors
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -47,11 +52,16 @@ fun TodoDetailsScreen(
                     TextButton(onClick = {
                         onSaveClick(text.text, importance, deadline)
                     }) {
-                        Text("СОХРАНИТЬ", color = MaterialTheme.colorScheme.primary)
+                        Text(
+                            text = "СОХРАНИТЬ",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = LocalExtendedColors.current.blue
+                        )
                     }
-                }
+                },
             )
         },
+        containerColor = LocalExtendedColors.current.primaryBackground,
         content = { paddingValues ->
             Column(
                 modifier = Modifier
@@ -64,14 +74,20 @@ fun TodoDetailsScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 16.dp)
-                        .height(100.dp),
+                        .height(104.dp),
                     textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onBackground),
                     decorationBox = { innerTextField ->
-                        Box(modifier = Modifier.fillMaxSize()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(LocalExtendedColors.current.secondaryBackground)
+                                .padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 12.dp)
+                        ) {
                             if (text.text.isEmpty()) {
                                 Text(
                                     "Что надо сделать...",
-                                    color = Color.Gray
+                                    color = LocalExtendedColors.current.tertiaryLabel
                                 )
                             }
                             innerTextField()
@@ -79,16 +95,36 @@ fun TodoDetailsScreen(
                     }
                 )
 
-                Text("Важность", style = MaterialTheme.typography.bodyLarge)
-                Spacer(modifier = Modifier.height(8.dp))
-                ImportanceSelector(
-                    selectedImportance = importance,
-                    onImportanceSelected = { importance = it }
-                )
-                HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Сделать до", style = MaterialTheme.typography.bodyLarge)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(vertical = 26.5.dp)
+                ) {
+                    Text(
+                        text = "Важность",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = LocalExtendedColors.current.primaryLabel,
+
+                        )
+                    Spacer(modifier = Modifier.weight(1f))
+                    ImportanceSelector(
+                        selectedImportance = importance,
+                        onImportanceSelected = { importance = it }
+                    )
+                }
+
+                HorizontalDivider()
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(vertical = 26.5.dp)
+                ) {
+                    Text(
+                        text = "Сделать до",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = LocalExtendedColors.current.primaryLabel,
+                        modifier = Modifier.padding(vertical = 26.5.dp)
+                    )
                     Spacer(modifier = Modifier.weight(1f))
                     Switch(
                         checked = deadline != null,
@@ -104,10 +140,12 @@ fun TodoDetailsScreen(
                 if (deadline != null) {
                     Text(
                         text = dateFormat.format(deadline),
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(top = 8.dp)
+                        color = LocalExtendedColors.current.secondaryLabel,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(top = 4.dp)
                     )
                 }
+
 
                 if (isDatePickerVisible) {
                     CustomDatePickerDialog(
@@ -122,25 +160,33 @@ fun TodoDetailsScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.height(24.dp))
+                HorizontalDivider()
 
                 if (isEditing) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
+                        horizontalArrangement = Arrangement.Start
                     ) {
                         TextButton(
-                            onClick = onDeleteClick,
+//                            onClick = onDeleteClick,
+                            onClick = {},
                             colors = ButtonDefaults.textButtonColors(
                                 contentColor = Color.Red
                             )
                         ) {
                             Icon(
                                 painter = painterResource(R.drawable.delete),
-                                contentDescription = "Удалить"
+                                contentDescription = "Удалить",
+                                modifier = Modifier.size(24.dp),
+                                tint = LocalExtendedColors.current.disableLabel
                             )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Удалить")
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                text = "Удалить",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = LocalExtendedColors.current.disableLabel
+                            )
                         }
                     }
                 }
