@@ -1,16 +1,12 @@
 package com.tisenres.yandextodoapp.presentation.screens.tododetails.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MaterialTheme.shapes
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Surface
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.tisenres.yandextodoapp.R
@@ -46,24 +42,32 @@ fun ImportanceSelector(
             val isSelected = option == selectedImportance
 
             val backgroundColor = if (isSelected) {
-                MaterialTheme.colorScheme.primaryContainer
+                MaterialTheme.colorScheme.primary
             } else {
                 MaterialTheme.colorScheme.surfaceVariant
             }
 
             val contentColor = if (isSelected) {
-                MaterialTheme.colorScheme.onPrimaryContainer
+                MaterialTheme.colorScheme.onPrimary
             } else {
                 color
             }
 
+            val borderStroke = if (isSelected) {
+                BorderStroke(2.dp, MaterialTheme.colorScheme.onPrimary)
+            } else {
+                null
+            }
+
             Surface(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(10.dp))
                     .clickable { onImportanceSelected(option) },
-                shape = shapes.small,
+                shape = MaterialTheme.shapes.small,
                 color = backgroundColor,
-                contentColor = contentColor
+                contentColor = contentColor,
+                tonalElevation = if (isSelected) 2.dp else 0.dp,
+                shadowElevation = if (isSelected) 4.dp else 0.dp,
+                border = borderStroke
             ) {
                 Box(
                     modifier = Modifier
