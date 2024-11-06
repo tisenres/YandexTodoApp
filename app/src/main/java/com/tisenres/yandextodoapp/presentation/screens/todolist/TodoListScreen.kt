@@ -62,6 +62,7 @@ fun TodoListContent(
                 elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 6.dp),
                 modifier = Modifier
                     .padding(bottom = 16.dp, end = 16.dp)
+                    .clip(CircleShape)
             ) {
                 Icon(
                     painter = painterResource(R.drawable.add),
