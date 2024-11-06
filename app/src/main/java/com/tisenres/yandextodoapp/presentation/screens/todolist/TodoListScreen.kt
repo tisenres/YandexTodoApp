@@ -1,6 +1,5 @@
 package com.tisenres.yandextodoapp.presentation.screens.todolist
 
-import android.widget.Space
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -53,7 +52,7 @@ fun TodoListContent(
                 containerColor = LocalExtendedColors.current.blue,
                 elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 8.dp),
                 modifier = Modifier
-                    .size(56.dp)
+                    .size(80.dp)
                     .padding(bottom = 16.dp, end = 16.dp)
                     .clip(CircleShape)
             ) {
