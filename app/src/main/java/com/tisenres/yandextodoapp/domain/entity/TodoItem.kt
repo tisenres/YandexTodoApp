@@ -2,7 +2,6 @@ package com.tisenres.yandextodoapp.domain.entity
 
 import java.util.Date
 
-
 data class TodoItem(
     val id: String,
     val text: String,
@@ -12,4 +11,3 @@ data class TodoItem(
     val createdAt: Date,
     val modifiedAt: Date? = null
 )
-
