@@ -119,12 +119,22 @@ fun TodoDetailsScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.padding(vertical = 26.5.dp)
                 ) {
-                    Text(
-                        text = "Сделать до",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = LocalExtendedColors.current.primaryLabel,
-                        modifier = Modifier.padding(vertical = 26.5.dp)
-                    )
+                    Column {
+                        Text(
+                            text = "Сделать до",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = LocalExtendedColors.current.primaryLabel,
+                            modifier = Modifier.padding(bottom = 4.dp)
+                        )
+                        if (deadline != null) {
+                            Text(
+                                text = dateFormat.format(deadline),
+                                color = LocalExtendedColors.current.blue,
+                                style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier.padding(top = 4.dp)
+                            )
+                        }
+                    }
                     Spacer(modifier = Modifier.weight(1f))
                     Switch(
                         checked = deadline != null,
@@ -136,31 +146,23 @@ fun TodoDetailsScreen(
                             }
                         }
                     )
-                }
-                if (deadline != null) {
-                    Text(
-                        text = dateFormat.format(deadline),
-                        color = LocalExtendedColors.current.secondaryLabel,
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                }
 
 
-                if (isDatePickerVisible) {
-                    CustomDatePickerDialog(
-                        initialDate = deadline ?: Date(),
-                        onDateSelected = { date ->
-                            deadline = date
-                            isDatePickerVisible = false
-                        },
-                        onDismissRequest = {
-                            isDatePickerVisible = false
-                        }
-                    )
-                }
+                    if (isDatePickerVisible) {
+                        CustomDatePickerDialog(
+                            initialDate = deadline ?: Date(),
+                            onDateSelected = { date ->
+                                deadline = date
+                                isDatePickerVisible = false
+                            },
+                            onDismissRequest = {
+                                isDatePickerVisible = false
+                            }
+                        )
+                    }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
                 HorizontalDivider()
 
                 if (isEditing) {
@@ -190,6 +192,7 @@ fun TodoDetailsScreen(
                         }
                     }
                 }
+
             }
         }
     )
