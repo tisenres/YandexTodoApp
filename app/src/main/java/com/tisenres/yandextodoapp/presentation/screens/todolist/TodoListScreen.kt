@@ -30,7 +30,7 @@ import java.util.Date
 @Composable
 fun TodoListScreen(
     viewModel: TodoListViewModel = hiltViewModel(),
-    onTodoClick: (String) -> Unit,
+    onTodoClick: (String, String) -> Unit,
     onCreateTodoClick: () -> Unit
 ) {
     val todos by viewModel.todos.collectAsState()
@@ -48,7 +48,7 @@ fun TodoListScreen(
 @Composable
 fun TodoListContent(
     todos: List<TodoItem>,
-    onTodoClick: (String) -> Unit,
+    onTodoClick: (String, String) -> Unit,
     onCreateTodoClick: () -> Unit,
     onCompleteTodo: (String) -> Unit,
     onDeleteTodo: (String) -> Unit,
@@ -147,7 +147,7 @@ fun HeaderAndCompletedTodos(
 @Composable
 fun TodoList(
     todos: List<TodoItem>,
-    onTodoClick: (String) -> Unit,
+    onTodoClick: (String, String) -> Unit,
     onCompleteTodo: (String) -> Unit,
     onCreateTodoClick: () -> Unit,
     onDeleteTodo: (String) -> Unit,
@@ -213,7 +213,7 @@ fun TodoList(
                         text = item.text,
                         importance = item.importance,
                         isCompleted = item.isCompleted,
-                        onClick = { onTodoClick(item.id) },
+                        onClick = { text -> onTodoClick(item.id, text) },
                         onCheckedChange = {}
                     )
                 }
@@ -289,7 +289,7 @@ fun TodoListPreview() {
     )
     TodoList(
         todos = sampleTodos,
-        onTodoClick = {},
+        onTodoClick = { _, _ -> },
         onCompleteTodo = {},
         onCreateTodoClick = {},
         onDeleteTodo = {}
@@ -306,7 +306,7 @@ fun TodoListContentPreview() {
     )
     TodoListContent(
         todos = sampleTodos,
-        onTodoClick = {},
+        onTodoClick = {_, _ -> },
         onCreateTodoClick = {},
         onCompleteTodo = {},
         onDeleteTodo = {}

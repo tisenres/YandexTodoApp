@@ -24,9 +24,12 @@ class TodoItemsRepositoryImpl @Inject constructor() : TodoItemsRepository {
     override suspend fun updateTodoItem(item: TodoItem) {
     }
 
-    override suspend fun addTodoItem(item: TodoItem) {}
+    override suspend fun addTodoItem(item: TodoItem) {
+        items.value += item
+    }
 
     override suspend fun deleteTodoItem(id: String) {
+        items.value = items.value.filter { it.id != id }
     }
 
     private fun generateMockData(): List<TodoItem> {

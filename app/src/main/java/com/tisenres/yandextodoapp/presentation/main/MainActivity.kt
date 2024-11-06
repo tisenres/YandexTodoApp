@@ -28,8 +28,8 @@ class MainActivity : ComponentActivity() {
                 NavHost(navController = navController, startDestination = "todoList") {
                     composable("todoList") {
                         TodoListScreen(
-                            onTodoClick = { todoId ->
-                                navController.navigate("todoDetails/$todoId")
+                            onTodoClick = { todoId, todoText ->
+                                navController.navigate("todoDetails/$todoId/$todoText")
                             },
                             onCreateTodoClick = {
                                 navController.navigate("createTodo")
@@ -37,17 +37,23 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     composable(
-                        "todoDetails/{todoId}",
-                        arguments = listOf(navArgument("todoId") { type = NavType.StringType })
+                        "todoDetails/{todoId}/{todoText}",
+                        arguments = listOf(
+                            navArgument("todoId") { type = NavType.StringType },
+                            navArgument("todoText") { type = NavType.StringType }
+                        )
                     ) { backStackEntry ->
-                        val todoId = backStackEntry.arguments?.getString("todoId") ?: return@composable
+                        val todoId =
+                            backStackEntry.arguments?.getString("todoId") ?: return@composable
+                        val todoText =
+                            backStackEntry.arguments?.getString("todoText") ?: return@composable
                         val viewModel = hiltViewModel<TodoDetailsViewModel>()
                         viewModel.loadTodo(todoId)
 
                         val todoState by viewModel.todo.collectAsState()
 
                         TodoDetailsScreen(
-                            initialText = todoState?.text ?: "",
+                            initialText = todoText,
                             initialImportance = todoState?.importance ?: Importance.NORMAL,
                             initialDeadline = todoState?.deadline,
                             isEditing = true,
