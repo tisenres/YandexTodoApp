@@ -50,9 +50,11 @@ fun TodoListContent(
             FloatingActionButton(
                 onClick = onCreateTaskClick,
                 containerColor = LocalExtendedColors.current.blue,
-                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 8.dp),
+                elevation = FloatingActionButtonDefaults.elevation(
+                    defaultElevation = 6.dp,
+                    pressedElevation = 8.dp,
+                ),
                 modifier = Modifier
-                    .size(80.dp)
                     .padding(bottom = 16.dp, end = 16.dp)
                     .clip(CircleShape)
             ) {
@@ -68,7 +70,7 @@ fun TodoListContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 8.dp)
+                .padding(paddingValues)
                 .background(LocalExtendedColors.current.primaryBackground)
         ) {
             HeaderAndCompletedTasks(

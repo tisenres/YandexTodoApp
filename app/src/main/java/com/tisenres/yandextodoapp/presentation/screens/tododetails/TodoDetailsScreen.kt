@@ -69,7 +69,7 @@ fun TodoDetailsScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 16.dp),
                     shape = RoundedCornerShape(8.dp),
-                    color = LocalExtendedColors.current.secondaryBackground,
+                    color = LocalExtendedColors.current.elevatedBackground,
                     shadowElevation = 4.dp
                 ) {
                     BasicTextField(
