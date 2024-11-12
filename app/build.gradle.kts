@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -17,9 +19,22 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+        android.buildFeatures.buildConfig = true
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
+
+        val keystoreFile = project.rootProject.file("local.properties")
+        val properties = Properties()
+        properties.load(keystoreFile.inputStream())
+
+        val token = properties.getProperty("OAUTH_TOKEN") ?: ""
+
+        buildConfigField(
+            type = "String",
+            name = "TOKEN",
+            value = token
+        )
     }
 
     buildTypes {

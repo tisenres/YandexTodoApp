@@ -1,5 +1,6 @@
 package com.tisenres.yandextodoapp.di
 
+import com.tisenres.yandextodoapp.data.remote.TodoApi
 import com.tisenres.yandextodoapp.data.repository.TodoItemsRepositoryImpl
 import com.tisenres.yandextodoapp.domain.repository.TodoItemsRepository
 import com.tisenres.yandextodoapp.domain.usecases.AddTodoItemUseCase
@@ -9,15 +10,18 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
     @Provides
+    @Singleton
     fun provideTodoItemsRepository(
+        todoApi: TodoApi
     ): TodoItemsRepository {
-        return TodoItemsRepositoryImpl()
+        return TodoItemsRepositoryImpl(todoApi)
     }
 
     @Provides
