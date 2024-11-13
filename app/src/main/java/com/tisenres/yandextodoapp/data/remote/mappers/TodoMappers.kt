@@ -11,10 +11,10 @@ fun TodoDto.toDomainModel(): TodoItem {
         id = id.toString(),
         text = text,
         importance = mapColorToImportance(color),
-        deadline = Date(deadline * 1000L),
+        deadline = Date(deadline ?: 0),
         isCompleted = done,
-        createdAt = Date(createdAt * 1000L),
-        modifiedAt = Date(changedAt * 1000L)
+        createdAt = Date(createdAt),
+        modifiedAt = Date(changedAt)
     )
 }
 
@@ -22,13 +22,17 @@ fun TodoItem.toNetworkModel(): TodoDto {
     return TodoDto(
         id = UUID.fromString(id),
         text = text,
-        importance = "low",
-        deadline = deadline?.time?.div(1000)?.toInt() ?: 0,
+        importance = when (importance) {
+            Importance.HIGH -> "important"
+            Importance.NORMAL -> "basic"
+            Importance.LOW -> "low"
+        },
+        deadline = deadline?.time,
         done = isCompleted,
         color = null,
-        createdAt = (createdAt.time / 1000).toInt(),
-        changedAt = modifiedAt?.time?.div(1000)?.toInt() ?: 0,
-        lastUpdatedBy = "device123"
+        createdAt = createdAt.time,
+        changedAt = System.currentTimeMillis(),
+        lastUpdatedBy = "pixel 4"
     )
 }
 

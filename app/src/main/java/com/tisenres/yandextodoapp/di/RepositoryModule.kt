@@ -1,6 +1,7 @@
 package com.tisenres.yandextodoapp.di
 
-import com.tisenres.yandextodoapp.data.remote.TodoApi
+import com.tisenres.yandextodoapp.data.local.preference.AppPreference
+import com.tisenres.yandextodoapp.data.remote.TodoApiService
 import com.tisenres.yandextodoapp.data.repository.TodoItemsRepositoryImpl
 import com.tisenres.yandextodoapp.domain.repository.TodoItemsRepository
 import dagger.Module
@@ -16,8 +17,10 @@ object RepositoryModule {
     @Provides
     @Singleton
     fun provideTodoItemsRepository(
-        todoApi: TodoApi
-    ): TodoItemsRepository {
-        return TodoItemsRepositoryImpl(todoApi)
+        todoApi: TodoApiService,
+        appPreference: AppPreference
+    ): TodoItemsRepository
+    {
+        return TodoItemsRepositoryImpl(todoApi, appPreference)
     }
 }

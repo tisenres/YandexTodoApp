@@ -9,17 +9,17 @@ data class TodoDto(
     @SerializedName("text")
     val text: String,
     @SerializedName("importance")
-    val deadline: Int,
+    val importance: String,
     @SerializedName("done")
     val done: Boolean,
     @SerializedName("color")
     val color: String?,
     @SerializedName("deadline")
-    val importance: String,
+    val deadline: Long?,
     @SerializedName("created_at")
-    val createdAt: Int,
+    val createdAt: Long,
     @SerializedName("changed_at")
-    val changedAt: Int,
+    val changedAt: Long,
     @SerializedName("last_updated_by")
     val lastUpdatedBy: String,
 )

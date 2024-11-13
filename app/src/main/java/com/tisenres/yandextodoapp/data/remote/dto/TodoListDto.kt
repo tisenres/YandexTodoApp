@@ -7,6 +7,6 @@ data class TodoListDto(
     val status: String,
     @SerializedName("list")
     val todoList: List<TodoDto>,
-//    @SerializedName("revision")
-//    val revision: Int? = 0,
+    @SerializedName("revision")
+    val revision: Int,
 )

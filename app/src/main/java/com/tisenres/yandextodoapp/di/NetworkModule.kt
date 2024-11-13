@@ -2,7 +2,7 @@ package com.tisenres.yandextodoapp.di
 
 import com.tisenres.yandextodoapp.BuildConfig
 import com.tisenres.yandextodoapp.data.local.preference.AppPreference
-import com.tisenres.yandextodoapp.data.remote.TodoApi
+import com.tisenres.yandextodoapp.data.remote.TodoApiService
 import com.tisenres.yandextodoapp.data.remote.interceptors.ErrorHandlingInterceptor
 import com.tisenres.yandextodoapp.data.remote.interceptors.HeaderInterceptor
 import okhttp3.OkHttpClient
@@ -51,8 +51,8 @@ object NetworkModule {
     ): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(headerInterceptor)
-            .addInterceptor(loggingInterceptor)
             .addInterceptor(errorHandlingInterceptor)
+            .addInterceptor(loggingInterceptor)
             .build()
     }
 
@@ -68,7 +68,7 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideTodoApi(retrofit: Retrofit): TodoApi {
-        return retrofit.create(TodoApi::class.java)
+    fun provideTodoApi(retrofit: Retrofit): TodoApiService {
+        return retrofit.create(TodoApiService::class.java)
     }
 }
