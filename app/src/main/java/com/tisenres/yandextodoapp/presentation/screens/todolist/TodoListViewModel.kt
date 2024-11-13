@@ -3,6 +3,7 @@ package com.tisenres.yandextodoapp.presentation.screens.todolist
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.tisenres.yandextodoapp.data.remote.interceptors.BadRequestException
 import com.tisenres.yandextodoapp.domain.entity.TodoItem
 import com.tisenres.yandextodoapp.domain.usecases.DeleteTodoUseCase
 import com.tisenres.yandextodoapp.domain.usecases.GetTodosUseCase
@@ -23,7 +24,6 @@ import javax.inject.Inject
 class TodoListViewModel @Inject constructor(
     private val getTodosUseCase: GetTodosUseCase,
     private val updateTodoUseCase: UpdateTodoUseCase,
-    private val updateAllTodosUseCase: UpdateAllTodosUseCase,
     private val deleteTodoUseCase: DeleteTodoUseCase
 ) : ViewModel() {
 
@@ -53,6 +53,8 @@ class TodoListViewModel @Inject constructor(
                     }
                 }
                 _isError.value = false
+            } catch (e: BadRequestException) {
+                _errorMessage.value = "Bad Request: ${e.message}"
             } catch (e: Exception) {
                 Log.e("TodoListViewModel", "Error fetching todos", e)
                 _errorMessage.value = "Something went wrong"
@@ -78,6 +80,8 @@ class TodoListViewModel @Inject constructor(
                     }
                     _isError.value = false
                     break
+                } catch (e: BadRequestException) {
+                    _errorMessage.value = "Bad Request: ${e.message}"
                 } catch (e: Exception) {
                     retryCount++
                     Log.e("TodoListViewModel", "Error fetching todos, retry $retryCount", e)
@@ -107,6 +111,8 @@ class TodoListViewModel @Inject constructor(
                         updateTodoUseCase(updatedTodo)
                     }
                 }
+            } catch (e: BadRequestException) {
+                _errorMessage.value = "Bad Request: ${e.message}"
             } catch (e: Exception) {
                 Log.e("TodoListViewModel", "Error completing todo", e)
                 _errorMessage.value = "Something went wrong"
@@ -122,6 +128,8 @@ class TodoListViewModel @Inject constructor(
                 withContext(Dispatchers.IO) {
                     deleteTodoUseCase(todoId)
                 }
+            } catch (e: BadRequestException) {
+                _errorMessage.value = "Bad Request: ${e.message}"
             } catch (e: Exception) {
                 Log.e("TodoListViewModel", "Error deleting todo", e)
                 _errorMessage.value = "Error deleting todo"
