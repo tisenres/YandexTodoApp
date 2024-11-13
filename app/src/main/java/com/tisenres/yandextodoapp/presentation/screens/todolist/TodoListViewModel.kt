@@ -37,7 +37,7 @@ class TodoListViewModel @Inject constructor(
     val errorMessage: StateFlow<String?> get() = _errorMessage
 
     init {
-        getAllTodos()
+        refreshTodos()
     }
 
     private fun getAllTodos() {
@@ -58,23 +58,6 @@ class TodoListViewModel @Inject constructor(
         }
     }
 
-    fun createTodo(todo: TodoItem) {
-        viewModelScope.launch {
-            _isLoading.value = true
-            try {
-                withContext(Dispatchers.IO) {
-                    createTodoUseCase(todo)
-                }
-                getAllTodos()
-            } catch (e: Exception) {
-                Log.e("TodoListViewModel", "Error creating todo", e)
-                _errorMessage.value = e.message ?: "Error creating todo"
-            } finally {
-                _isLoading.value = false
-            }
-        }
-    }
-
     private fun updateTodo(todo: TodoItem) {
         viewModelScope.launch {
             _isLoading.value = true
@@ -82,7 +65,6 @@ class TodoListViewModel @Inject constructor(
                 withContext(Dispatchers.IO) {
                     updateTodoUseCase(todo)
                 }
-                // Update local state
                 _todos.value = _todos.value.map {
                     if (it.id == todo.id) todo else it
                 }

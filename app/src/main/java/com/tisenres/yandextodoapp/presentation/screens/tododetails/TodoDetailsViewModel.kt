@@ -23,54 +23,57 @@ import javax.inject.Inject
 class TodoDetailsViewModel @Inject constructor(
     private val getTodoItemUseCase: GetTodoItemUseCase,
     private val createTodoUseCase: CreateTodoUseCase,
-    private val updateTodoUseCase: UpdateTodoUseCase,
-    private val deleteTodoUseCase: DeleteTodoUseCase
+    private val deleteTodoUseCase: DeleteTodoUseCase,
+    private val updateTodoUseCase: UpdateTodoUseCase
 ) : ViewModel() {
 
     private val _todo = MutableStateFlow<TodoItem?>(null)
-    val todo: StateFlow<TodoItem?> = _todo
+    val todo: StateFlow<TodoItem?> = _todo.asStateFlow()
 
-    private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     private val _errorMessage = MutableStateFlow<String?>(null)
-    val errorMessage: StateFlow<String?> get() = _errorMessage
+    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
-    fun loadTodo(todoId: String) {
+    fun getTodoById(todoId: String) {
         viewModelScope.launch {
-            val loadedTodo = getTodoItemUseCase(todoId)
-            _todo.value = loadedTodo
+            _isLoading.value = true
+            try {
+                withContext(Dispatchers.IO) {
+                    getTodoItemUseCase(todoId).collect { todo ->
+                        _todo.value = todo
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("TodoDetailsViewModel", "Error fetching todo by id", e)
+                _errorMessage.value = e.message ?: "Error fetching todo"
+            } finally {
+                _isLoading.value = false
+            }
         }
     }
 
     fun createTodo(text: String, importance: Importance, deadline: Date?) {
         viewModelScope.launch {
-            val newTodo = TodoItem(
-                id = UUID.randomUUID().toString(),
-                text = text,
-                importance = importance,
-                isCompleted = false,
-                deadline = deadline,
-                createdAt = Date(),
-                modifiedAt = null
-            )
-            createTodoUseCase(newTodo)
-        }
-    }
-
-    fun getTodoById(id: String) {
-        viewModelScope.launch {
             _isLoading.value = true
             try {
-                val todo = withContext(Dispatchers.IO) {
-                    getTodoItemUseCase(id)
-                }
-                todo?.let { updatedTodo ->
-                    _todo.value = updatedTodo
+                withContext(Dispatchers.IO) {
+                    createTodoUseCase(
+                        TodoItem(
+                            id = UUID.randomUUID().toString(),
+                            text = text,
+                            importance = importance,
+                            deadline = deadline,
+                            isCompleted = false,
+                            createdAt = Date(),
+                            modifiedAt = null
+                        )
+                    )
                 }
             } catch (e: Exception) {
-                Log.e("TodoListViewModel", "Error fetching todo by id", e)
-                _errorMessage.value = e.message ?: "Error fetching todo"
+                Log.e("TodoDetailsViewModel", "Error creating todo", e)
+                _errorMessage.value = e.message ?: "Error creating todo"
             } finally {
                 _isLoading.value = false
             }
@@ -79,22 +82,45 @@ class TodoDetailsViewModel @Inject constructor(
 
     fun updateTodo(todoId: String, text: String, importance: Importance, deadline: Date?) {
         viewModelScope.launch {
-            val currentTodo = _todo.value
-            if (currentTodo != null) {
-                val updatedTodo = currentTodo.copy(
-                    text = text,
-                    importance = importance,
-                    deadline = deadline,
-                    modifiedAt = Date()
-                )
-                updateTodoUseCase(updatedTodo)
+            _isLoading.value = true
+            try {
+                withContext(Dispatchers.IO) {
+                    _todo.value?.let { todo ->
+                        val updatedTodo = todo.copy(
+                            text = text,
+                            importance = importance,
+                            deadline = deadline,
+                            modifiedAt = Date()
+                        )
+                        updateTodoUseCase(updatedTodo)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("TodoDetailsViewModel", "Error updating todo", e)
+                _errorMessage.value = e.message ?: "Error updating todo"
+            } finally {
+                _isLoading.value = false
             }
         }
     }
 
     fun deleteTodo(todoId: String) {
         viewModelScope.launch {
-            deleteTodoUseCase(todoId)
+            _isLoading.value = true
+            try {
+                withContext(Dispatchers.IO) {
+                    deleteTodoUseCase(todoId)
+                }
+            } catch (e: Exception) {
+                Log.e("TodoDetailsViewModel", "Error deleting todo", e)
+                _errorMessage.value = e.message ?: "Error deleting todo"
+            } finally {
+                _isLoading.value = false
+            }
         }
+    }
+
+    fun clearErrorMessage() {
+        _errorMessage.value = null
     }
 }

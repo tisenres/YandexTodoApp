@@ -16,7 +16,7 @@ class TodoItemsRepositoryImpl @Inject constructor(
     private val appPreference: AppPreference
 ) : TodoItemsRepository {
 
-    override fun getAllTodos(): Flow<List<TodoItem>> = flow {
+    override suspend fun getAllTodos(): Flow<List<TodoItem>> = flow {
         val response = todoApi.getTodos()
         appPreference.setCurrentRevision(response.revision)
         emit(response.todoList.map { it.toDomainModel() })
@@ -29,10 +29,10 @@ class TodoItemsRepositoryImpl @Inject constructor(
         appPreference.setCurrentRevision(response.revision)
     }
 
-    override suspend fun getTodoItemById(id: String): TodoItem? {
+    override suspend fun getTodoItemById(id: String) = flow {
         val response = todoApi.getTodos()
         appPreference.setCurrentRevision(response.revision)
-        return response.todoList.find { it.id.toString() == id }?.toDomainModel()
+        emit(response.todoList.find { it.id.toString() == id }?.toDomainModel())
     }
 
     override suspend fun updateTodoItem(item: TodoItem) {

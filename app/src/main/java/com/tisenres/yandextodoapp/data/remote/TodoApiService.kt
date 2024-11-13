@@ -4,7 +4,6 @@ import com.tisenres.yandextodoapp.data.remote.dto.TodoDto
 import com.tisenres.yandextodoapp.data.remote.dto.TodoListDto
 import com.tisenres.yandextodoapp.data.remote.dto.TodoRequestDto
 import com.tisenres.yandextodoapp.data.remote.dto.TodoResponseDto
-import com.tisenres.yandextodoapp.domain.entity.TodoItem
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET

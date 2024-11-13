@@ -50,7 +50,7 @@ class MainActivity : ComponentActivity() {
                         val todoText =
                             backStackEntry.arguments?.getString("todoText") ?: return@composable
                         val viewModel = hiltViewModel<TodoDetailsViewModel>()
-                        viewModel.loadTodo(todoId)
+                        viewModel.getTodoById(todoId)
 
                         val todoState by viewModel.todo.collectAsState()
 

@@ -53,6 +53,10 @@ fun TodoListScreen(
         }
     }
 
+    LaunchedEffect(todos) {
+        viewModel.refreshTodos()
+    }
+
     TodoListContent(
         todos = todos,
         onTodoClick = onTodoClick,
