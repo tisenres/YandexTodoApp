@@ -39,6 +39,20 @@ fun TodoListScreen(
 ) {
     val todos by viewModel.todos.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
+
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let {
+            snackbarHostState.showSnackbar(
+                message = it,
+                duration = SnackbarDuration.Short
+            )
+            viewModel.clearErrorMessage()
+        }
+    }
+
     TodoListContent(
         todos = todos,
         onTodoClick = onTodoClick,
@@ -46,6 +60,7 @@ fun TodoListScreen(
         onCompleteTodo = { todoId -> viewModel.completeTodo(todoId) },
         onDeleteTodo = { todoId -> viewModel.deleteTodo(todoId) },
         isLoading = isLoading,
+        snackbarHostState = snackbarHostState,
         modifier = Modifier.fillMaxSize(),
         viewModel = viewModel
     )
@@ -59,6 +74,7 @@ fun TodoListContent(
     onCompleteTodo: (String) -> Unit,
     onDeleteTodo: (String) -> Unit,
     isLoading: Boolean,
+    snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier,
     viewModel: TodoListViewModel
 ) {
@@ -78,6 +94,19 @@ fun TodoListContent(
                     tint = Color.White
                 )
             }
+        },
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.padding(16.dp),
+                snackbar = { snackbarData ->
+                    Snackbar(
+                        snackbarData = snackbarData,
+                        containerColor = LocalExtendedColors.current.elevatedBackground,
+                        contentColor = LocalExtendedColors.current.red,
+                    )
+                }
+            )
         },
         modifier = modifier
     ) { paddingValues ->
@@ -383,13 +412,13 @@ fun TodoListContentPreview() {
             createdAt = Date()
         )
     )
-    TodoListContent(
-        todos = sampleTodos,
-        onTodoClick = { _, _ -> },
-        onCreateTodoClick = {},
-        onCompleteTodo = {},
-        onDeleteTodo = {},
-        isLoading = true,
-        viewModel = hiltViewModel()
-    )
+//    TodoListContent(
+//        todos = sampleTodos,
+//        onTodoClick = { _, _ -> },
+//        onCreateTodoClick = {},
+//        onCompleteTodo = {},
+//        onDeleteTodo = {},
+//        isLoading = true,
+//        viewModel = hiltViewModel()
+//    )
 }

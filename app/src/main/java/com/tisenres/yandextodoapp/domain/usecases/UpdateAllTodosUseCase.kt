@@ -4,10 +4,10 @@ import com.tisenres.yandextodoapp.domain.entity.TodoItem
 import com.tisenres.yandextodoapp.domain.repository.TodoItemsRepository
 import javax.inject.Inject
 
-class UpdateTodoItemUseCase @Inject constructor(
-    private val repository: TodoItemsRepository
+class UpdateAllTodosUseCase @Inject constructor(
+    private val todoRepository: TodoItemsRepository
 ) {
-    suspend operator fun invoke(todoItem: TodoItem) {
-        repository.updateTodoItem(todoItem)
+    suspend operator fun invoke(todos: List<TodoItem>) {
+        todoRepository.updateAllTodos(todos)
     }
 }

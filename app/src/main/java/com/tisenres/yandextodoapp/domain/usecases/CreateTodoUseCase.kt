@@ -4,7 +4,7 @@ import com.tisenres.yandextodoapp.domain.entity.TodoItem
 import com.tisenres.yandextodoapp.domain.repository.TodoItemsRepository
 import javax.inject.Inject
 
-class AddTodoItemUseCase @Inject constructor(
+class CreateTodoUseCase @Inject constructor(
     private val repository: TodoItemsRepository
 ) {
     suspend operator fun invoke(todoItem: TodoItem) {

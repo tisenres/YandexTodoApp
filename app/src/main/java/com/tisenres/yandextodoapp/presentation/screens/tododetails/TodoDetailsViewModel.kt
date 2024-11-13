@@ -1,30 +1,40 @@
 package com.tisenres.yandextodoapp.presentation.screens.tododetails
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tisenres.yandextodoapp.domain.entity.Importance
 import com.tisenres.yandextodoapp.domain.entity.TodoItem
-import com.tisenres.yandextodoapp.domain.usecases.AddTodoItemUseCase
-import com.tisenres.yandextodoapp.domain.usecases.DeleteTodoItemUseCase
+import com.tisenres.yandextodoapp.domain.usecases.CreateTodoUseCase
+import com.tisenres.yandextodoapp.domain.usecases.DeleteTodoUseCase
 import com.tisenres.yandextodoapp.domain.usecases.GetTodoItemUseCase
-import com.tisenres.yandextodoapp.domain.usecases.UpdateTodoItemUseCase
+import com.tisenres.yandextodoapp.domain.usecases.UpdateTodoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
 class TodoDetailsViewModel @Inject constructor(
     private val getTodoItemUseCase: GetTodoItemUseCase,
-    private val addTodoItemUseCase: AddTodoItemUseCase,
-    private val updateTodoItemUseCase: UpdateTodoItemUseCase,
-    private val deleteTodoItemUseCase: DeleteTodoItemUseCase
+    private val createTodoUseCase: CreateTodoUseCase,
+    private val updateTodoUseCase: UpdateTodoUseCase,
+    private val deleteTodoUseCase: DeleteTodoUseCase
 ) : ViewModel() {
 
     private val _todo = MutableStateFlow<TodoItem?>(null)
     val todo: StateFlow<TodoItem?> = _todo
+
+    private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> get() = _errorMessage
 
     fun loadTodo(todoId: String) {
         viewModelScope.launch {
@@ -44,7 +54,26 @@ class TodoDetailsViewModel @Inject constructor(
                 createdAt = Date(),
                 modifiedAt = null
             )
-            addTodoItemUseCase(newTodo)
+            createTodoUseCase(newTodo)
+        }
+    }
+
+    fun getTodoById(id: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val todo = withContext(Dispatchers.IO) {
+                    getTodoItemUseCase(id)
+                }
+                todo?.let { updatedTodo ->
+                    _todo.value = updatedTodo
+                }
+            } catch (e: Exception) {
+                Log.e("TodoListViewModel", "Error fetching todo by id", e)
+                _errorMessage.value = e.message ?: "Error fetching todo"
+            } finally {
+                _isLoading.value = false
+            }
         }
     }
 
@@ -58,14 +87,14 @@ class TodoDetailsViewModel @Inject constructor(
                     deadline = deadline,
                     modifiedAt = Date()
                 )
-                updateTodoItemUseCase(updatedTodo)
+                updateTodoUseCase(updatedTodo)
             }
         }
     }
 
     fun deleteTodo(todoId: String) {
         viewModelScope.launch {
-            deleteTodoItemUseCase(todoId)
+            deleteTodoUseCase(todoId)
         }
     }
 }
