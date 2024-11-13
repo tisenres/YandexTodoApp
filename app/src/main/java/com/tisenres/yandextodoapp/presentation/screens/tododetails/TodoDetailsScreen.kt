@@ -10,7 +10,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.tisenres.yandextodoapp.R
 import com.tisenres.yandextodoapp.domain.entity.Importance
@@ -23,19 +22,35 @@ import java.util.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TodoDetailsScreen(
+    todoId: String,
     initialText: String = "",
     initialImportance: Importance = Importance.NORMAL,
     initialDeadline: Date? = null,
     isEditing: Boolean = false,
     onSaveClick: (String, Importance, Date?) -> Unit,
     onDeleteClick: () -> Unit,
-    onCloseClick: () -> Unit
+    onCloseClick: () -> Unit,
+    viewModel: TodoDetailsViewModel
 ) {
-    var text by remember { mutableStateOf(TextFieldValue(initialText)) }
-    var importance by remember { mutableStateOf(initialImportance) }
-    var deadline by remember { mutableStateOf(initialDeadline) }
+    val todoItem by viewModel.todo.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+
+    var text by remember { mutableStateOf(TextFieldValue(todoItem?.text ?: "")) }
+    var importance by remember { mutableStateOf(todoItem?.importance ?: Importance.NORMAL) }
+    var deadline by remember { mutableStateOf(todoItem?.deadline) }
     var isDatePickerVisible by remember { mutableStateOf(false) }
     val dateFormat = SimpleDateFormat("d MMM yyyy", Locale.getDefault())
+
+    // Fetch data when screen is first launched or `todoId` changes
+    LaunchedEffect(todoId) {
+        viewModel.getTodoById(todoId)
+    }
+
+    // Show loading indicator if data is being fetched
+    if (isLoading) {
+        CircularProgressIndicator(modifier = Modifier)
+    }
+
 
     Scaffold(
         topBar = {
@@ -200,18 +215,18 @@ fun TodoDetailsScreen(
     )
 }
 
-@Preview(showBackground = true)
-@Composable
-fun TodoDetailsScreenPreview() {
-    TodoDetailsScreen(
-        initialText = "Купить продукты",
-        initialImportance = Importance.HIGH,
-        initialDeadline = Calendar.getInstance().apply {
-            add(Calendar.DAY_OF_MONTH, 3)
-        }.time,
-        isEditing = true,
-        onSaveClick = { _, _, _ -> },
-        onDeleteClick = {},
-        onCloseClick = {}
-    )
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun TodoDetailsScreenPreview() {
+//    TodoDetailsScreen(
+//        initialText = "Купить продукты",
+//        initialImportance = Importance.HIGH,
+//        initialDeadline = Calendar.getInstance().apply {
+//            add(Calendar.DAY_OF_MONTH, 3)
+//        }.time,
+//        isEditing = true,
+//        onSaveClick = { _, _, _ -> },
+//        onDeleteClick = {},
+//        onCloseClick = {}
+//    )
+//}

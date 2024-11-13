@@ -11,6 +11,7 @@ import com.tisenres.yandextodoapp.domain.usecases.GetTodoItemUseCase
 import com.tisenres.yandextodoapp.domain.usecases.UpdateTodoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -122,5 +123,10 @@ class TodoDetailsViewModel @Inject constructor(
 
     fun clearErrorMessage() {
         _errorMessage.value = null
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        viewModelScope.cancel()
     }
 }

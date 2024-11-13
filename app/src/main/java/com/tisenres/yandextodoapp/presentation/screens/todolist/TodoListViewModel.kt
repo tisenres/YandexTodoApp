@@ -11,6 +11,7 @@ import com.tisenres.yandextodoapp.domain.usecases.UpdateAllTodosUseCase
 import com.tisenres.yandextodoapp.domain.usecases.UpdateTodoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,7 +22,6 @@ import javax.inject.Inject
 @HiltViewModel
 class TodoListViewModel @Inject constructor(
     private val getTodosUseCase: GetTodosUseCase,
-    private val createTodoUseCase: CreateTodoUseCase,
     private val updateTodoUseCase: UpdateTodoUseCase,
     private val updateAllTodosUseCase: UpdateAllTodosUseCase,
     private val deleteTodoUseCase: DeleteTodoUseCase
@@ -51,7 +51,7 @@ class TodoListViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 Log.e("TodoListViewModel", "Error fetching todos", e)
-                _errorMessage.value = e.message ?: "Error fetching todos"
+                _errorMessage.value = e.message ?: "Something went wrong"
             } finally {
                 _isLoading.value = false
             }
@@ -70,7 +70,7 @@ class TodoListViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 Log.e("TodoListViewModel", "Error updating todo", e)
-                _errorMessage.value = e.message ?: "Error updating todo"
+                _errorMessage.value = e.message ?: "Something went wrong"
             } finally {
                 _isLoading.value = false
             }
@@ -87,7 +87,7 @@ class TodoListViewModel @Inject constructor(
                 _todos.value = todos
             } catch (e: Exception) {
                 Log.e("TodoListViewModel", "Error updating all todos", e)
-                _errorMessage.value = e.message ?: "Error updating todos"
+                _errorMessage.value = e.message ?: "Something went wrong"
             } finally {
                 _isLoading.value = false
             }
@@ -104,7 +104,7 @@ class TodoListViewModel @Inject constructor(
                 _todos.value = _todos.value.filterNot { it.id == todoId }
             } catch (e: Exception) {
                 Log.e("TodoListViewModel", "Error deleting todo", e)
-                _errorMessage.value = e.message ?: "Error deleting todo"
+                _errorMessage.value = e.message ?: "Something went wrong"
             } finally {
                 _isLoading.value = false
             }
@@ -126,12 +126,17 @@ class TodoListViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 Log.e("TodoListViewModel", "Error completing todo", e)
-                _errorMessage.value = e.message ?: "Error completing todo"
+                _errorMessage.value = e.message ?: "Something went wrong"
             }
         }
     }
 
     fun clearErrorMessage() {
         _errorMessage.value = null
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        viewModelScope.cancel()
     }
 }

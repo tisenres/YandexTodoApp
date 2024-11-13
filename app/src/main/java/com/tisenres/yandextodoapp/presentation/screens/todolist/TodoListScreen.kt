@@ -102,7 +102,6 @@ fun TodoListContent(
         snackbarHost = {
             SnackbarHost(
                 hostState = snackbarHostState,
-                modifier = Modifier.padding(16.dp),
                 snackbar = { snackbarData ->
                     Snackbar(
                         snackbarData = snackbarData,

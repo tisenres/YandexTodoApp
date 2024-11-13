@@ -55,6 +55,7 @@ class MainActivity : ComponentActivity() {
                         val todoState by viewModel.todo.collectAsState()
 
                         TodoDetailsScreen(
+                            todoId = todoId,
                             initialText = todoText,
                             initialImportance = todoState?.importance ?: Importance.NORMAL,
                             initialDeadline = todoState?.deadline,
@@ -69,7 +70,8 @@ class MainActivity : ComponentActivity() {
                             },
                             onCloseClick = {
                                 navController.popBackStack()
-                            }
+                            },
+                            viewModel = hiltViewModel()
                         )
                     }
 
@@ -77,6 +79,11 @@ class MainActivity : ComponentActivity() {
                         val viewModel = hiltViewModel<TodoDetailsViewModel>()
 
                         TodoDetailsScreen(
+                            todoId = "",
+                            initialText = "",
+                            initialImportance = Importance.NORMAL,
+                            initialDeadline = null,
+                            isEditing = false,
                             onSaveClick = { text, importance, deadline ->
                                 viewModel.createTodo(text, importance, deadline)
                                 navController.popBackStack()
@@ -86,7 +93,8 @@ class MainActivity : ComponentActivity() {
                             },
                             onCloseClick = {
                                 navController.popBackStack()
-                            }
+                            },
+                            viewModel = viewModel
                         )
                     }
                 }

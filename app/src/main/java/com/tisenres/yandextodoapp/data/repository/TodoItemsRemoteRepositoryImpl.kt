@@ -6,15 +6,15 @@ import com.tisenres.yandextodoapp.data.remote.dto.TodoRequestDto
 import com.tisenres.yandextodoapp.data.remote.mappers.toDomainModel
 import com.tisenres.yandextodoapp.data.remote.mappers.toNetworkModel
 import com.tisenres.yandextodoapp.domain.entity.TodoItem
-import com.tisenres.yandextodoapp.domain.repository.TodoItemsRepository
+import com.tisenres.yandextodoapp.domain.repository.TodoItemsRemoteRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
-class TodoItemsRepositoryImpl @Inject constructor(
+class TodoItemsRemoteRepositoryImpl @Inject constructor(
     private val todoApi: TodoApiService,
     private val appPreference: AppPreference
-) : TodoItemsRepository {
+) : TodoItemsRemoteRepository {
 
     override suspend fun getAllTodos(): Flow<List<TodoItem>> = flow {
         val response = todoApi.getTodos()
