@@ -8,5 +8,5 @@ data class TodoResponseDto(
     @SerializedName("element")
     val element: TodoDto,
     @SerializedName("revision")
-    val revision: Int? = 0,
+    val revision: Int,
 )

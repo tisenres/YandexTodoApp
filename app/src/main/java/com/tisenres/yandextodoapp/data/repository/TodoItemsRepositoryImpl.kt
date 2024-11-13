@@ -20,23 +20,37 @@ class TodoItemsRepositoryImpl @Inject constructor(
         val response = todoApi.getTodos()
         appPreference.setCurrentRevision(response.revision)
         emit(response.todoList.map { it.toDomainModel() })
-
-    }
-
-    override suspend fun getTodoItemById(id: String): TodoItem? {
-        return todoApi.getTodos().todoList.find { it.id.toString() == id }?.toDomainModel()
-    }
-
-    override suspend fun updateTodoItem(item: TodoItem) {
     }
 
     override suspend fun createTodo(item: TodoItem) {
-        todoApi.createTodo(
+        val response = todoApi.createTodo(
             TodoRequestDto(item.toNetworkModel())
         )
+        appPreference.setCurrentRevision(response.revision)
+    }
+
+    override suspend fun getTodoItemById(id: String): TodoItem? {
+        val response = todoApi.getTodos()
+        appPreference.setCurrentRevision(response.revision)
+        return response.todoList.find { it.id.toString() == id }?.toDomainModel()
+    }
+
+    override suspend fun updateTodoItem(item: TodoItem) {
+        val response = todoApi.updateTodoById(
+            TodoRequestDto(item.toNetworkModel()),
+            item.id
+        )
+        appPreference.setCurrentRevision(response.revision)
     }
 
     override suspend fun deleteTodoItem(id: String) {
+        val response = todoApi.deleteTodoById(id)
+        appPreference.setCurrentRevision(response.revision)
+    }
 
+    override suspend fun updateAllTodos(todos: List<TodoItem>) {
+        val networkTodos = todos.map { it.toNetworkModel() }
+        val response = todoApi.updateTodos(networkTodos)
+        appPreference.setCurrentRevision(response.revision)
     }
 }

@@ -9,4 +9,5 @@ interface TodoItemsRepository {
     suspend fun createTodo(item: TodoItem)
     suspend fun updateTodoItem(item: TodoItem)
     suspend fun deleteTodoItem(id: String)
+    suspend fun updateAllTodos(todos: List<TodoItem>)
 }
