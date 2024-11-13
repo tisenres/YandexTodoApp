@@ -129,6 +129,8 @@ dependencies {
     kaptAndroidTest(libs.hiltCompiler)
     testImplementation(libs.hiltAndroidTesting)
     kaptTest(libs.hiltCompiler)
+
+    implementation(libs.androidx.work.runtime.ktx)
 }
 
 kapt {

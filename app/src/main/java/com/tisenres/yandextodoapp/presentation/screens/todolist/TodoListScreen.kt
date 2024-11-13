@@ -1,5 +1,8 @@
 package com.tisenres.yandextodoapp.presentation.screens.todolist
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.Network
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,7 +23,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -40,8 +45,10 @@ fun TodoListScreen(
     val todos by viewModel.todos.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
+    val isError by viewModel.isError.collectAsState()
 
     val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(errorMessage) {
         errorMessage?.let {
@@ -53,8 +60,25 @@ fun TodoListScreen(
         }
     }
 
-    LaunchedEffect(todos) {
-        viewModel.refreshTodos()
+    val context = LocalContext.current
+    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val isConnected = remember { mutableStateOf(true) }
+
+    DisposableEffect(Unit) {
+        val networkCallback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                isConnected.value = true
+                viewModel.refreshTodosWithRetry()
+            }
+
+            override fun onLost(network: Network) {
+                isConnected.value = false
+            }
+        }
+        connectivityManager.registerDefaultNetworkCallback(networkCallback)
+        onDispose {
+            connectivityManager.unregisterNetworkCallback(networkCallback)
+        }
     }
 
     TodoListContent(
@@ -64,6 +88,8 @@ fun TodoListScreen(
         onCompleteTodo = { todoId -> viewModel.completeTodo(todoId) },
         onDeleteTodo = { todoId -> viewModel.deleteTodo(todoId) },
         isLoading = isLoading,
+        isError = isError,
+        onRetryClick = { viewModel.refreshTodosWithRetry() },
         snackbarHostState = snackbarHostState,
         modifier = Modifier.fillMaxSize(),
         viewModel = viewModel
@@ -78,6 +104,8 @@ fun TodoListContent(
     onCompleteTodo: (String) -> Unit,
     onDeleteTodo: (String) -> Unit,
     isLoading: Boolean,
+    isError: Boolean,
+    onRetryClick: () -> Unit,
     snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier,
     viewModel: TodoListViewModel
@@ -94,7 +122,7 @@ fun TodoListContent(
             ) {
                 Icon(
                     painter = painterResource(R.drawable.add),
-                    contentDescription = "Add Todo",
+                    contentDescription = stringResource(R.string.add_todo),
                     tint = Color.White
                 )
             }
@@ -118,39 +146,49 @@ fun TodoListContent(
                 .background(LocalExtendedColors.current.primaryBackground)
                 .padding(paddingValues)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-//                    .padding(paddingValues)
-//                    .background(LocalExtendedColors.current.primaryBackground)
-            ) {
-                HeaderAndCompletedTodos(
-                    completedTodos = todos.count { it.isCompleted },
-                    onEyeClick = {}
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                TodoList(
-                    todos = todos,
-                    onTodoClick = onTodoClick,
-                    onCompleteTodo = onCompleteTodo,
-                    onCreateTodoClick = onCreateTodoClick,
-                    onDeleteTodo = onDeleteTodo,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 8.dp)
-                    ,
-                    isLoading = isLoading,
-                    viewModel = viewModel
-                )
-
-                Box(
+            if (isError && todos.isEmpty()) {
+                Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .wrapContentSize(Alignment.Center)
-                        .background(Color.Black.copy(alpha = 0.5f))
-                )
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = stringResource(R.string.error_loading_data),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = LocalExtendedColors.current.primaryLabel
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button(onClick = onRetryClick) {
+                        Text(text = stringResource(R.string.retry))
+                    }
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
+                    HeaderAndCompletedTodos(
+                        completedTodos = todos.count { it.isCompleted },
+                        onEyeClick = {}
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    TodoList(
+                        todos = todos,
+                        onTodoClick = onTodoClick,
+                        onCompleteTodo = onCompleteTodo,
+                        onCreateTodoClick = onCreateTodoClick,
+                        onDeleteTodo = onDeleteTodo,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 8.dp),
+                        isLoading = isLoading,
+                        viewModel = viewModel
+                    )
+                }
             }
         }
     }
@@ -219,7 +257,7 @@ fun TodoList(
 
     PullToRefreshBox(
         state = pullRefreshState,
-        onRefresh = { viewModel.refreshTodos() },
+        onRefresh = { viewModel.refreshTodosWithRetry() },
         isRefreshing = isLoading,
         indicator = {
             PullToRefreshDefaults.Indicator(
@@ -294,7 +332,9 @@ fun TodoList(
                             importance = item.importance,
                             isCompleted = item.isCompleted,
                             onClick = { text -> onTodoClick(item.id, text) },
-                            onCheckedChange = {}
+                            onCheckedChange = { checked ->
+                                onCompleteTodo(item.id)
+                            }
                         )
                     }
                 )

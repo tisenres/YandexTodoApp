@@ -48,7 +48,7 @@ class TodoDetailsViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 Log.e("TodoDetailsViewModel", "Error fetching todo by id", e)
-                _errorMessage.value = e.message ?: "Error fetching todo"
+                _errorMessage.value = "Something went wrong"
             } finally {
                 _isLoading.value = false
             }
@@ -74,7 +74,7 @@ class TodoDetailsViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 Log.e("TodoDetailsViewModel", "Error creating todo", e)
-                _errorMessage.value = e.message ?: "Error creating todo"
+                _errorMessage.value = "Something went wrong"
             } finally {
                 _isLoading.value = false
             }
@@ -86,19 +86,20 @@ class TodoDetailsViewModel @Inject constructor(
             _isLoading.value = true
             try {
                 withContext(Dispatchers.IO) {
-                    _todo.value?.let { todo ->
-                        val updatedTodo = todo.copy(
-                            text = text,
-                            importance = importance,
-                            deadline = deadline,
-                            modifiedAt = Date()
-                        )
-                        updateTodoUseCase(updatedTodo)
-                    }
+                    val updatedTodo = TodoItem(
+                        id = todoId,
+                        text = text,
+                        importance = importance,
+                        deadline = deadline,
+                        isCompleted = _todo.value?.isCompleted ?: false,
+                        createdAt = _todo.value?.createdAt ?: Date(),
+                        modifiedAt = Date()
+                    )
+                    updateTodoUseCase(updatedTodo)
                 }
             } catch (e: Exception) {
                 Log.e("TodoDetailsViewModel", "Error updating todo", e)
-                _errorMessage.value = e.message ?: "Error updating todo"
+                _errorMessage.value = "Something went wrong"
             } finally {
                 _isLoading.value = false
             }
@@ -114,7 +115,7 @@ class TodoDetailsViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 Log.e("TodoDetailsViewModel", "Error deleting todo", e)
-                _errorMessage.value = e.message ?: "Error deleting todo"
+                _errorMessage.value = "Something went wrong"
             } finally {
                 _isLoading.value = false
             }

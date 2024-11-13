@@ -11,7 +11,6 @@ fun TodoDto.toDomainModel(): TodoItem {
         id = id.toString(),
         text = text,
         importance = mapColorToImportance(color),
-        deadline = Date(deadline ?: 0),
         isCompleted = done,
         createdAt = Date(createdAt),
         modifiedAt = Date(changedAt)

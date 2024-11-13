@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tisenres.yandextodoapp.domain.entity.TodoItem
-import com.tisenres.yandextodoapp.domain.usecases.CreateTodoUseCase
 import com.tisenres.yandextodoapp.domain.usecases.DeleteTodoUseCase
 import com.tisenres.yandextodoapp.domain.usecases.GetTodosUseCase
 import com.tisenres.yandextodoapp.domain.usecases.UpdateAllTodosUseCase
@@ -12,6 +11,7 @@ import com.tisenres.yandextodoapp.domain.usecases.UpdateTodoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,8 +36,11 @@ class TodoListViewModel @Inject constructor(
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> get() = _errorMessage
 
+    private val _isError = MutableStateFlow(false)
+    val isError: StateFlow<Boolean> = _isError.asStateFlow()
+
     init {
-        refreshTodos()
+        getAllTodos()
     }
 
     private fun getAllTodos() {
@@ -49,84 +52,83 @@ class TodoListViewModel @Inject constructor(
                         _todos.value = todosList
                     }
                 }
+                _isError.value = false
             } catch (e: Exception) {
                 Log.e("TodoListViewModel", "Error fetching todos", e)
                 _errorMessage.value = "Something went wrong"
+                _isError.value = true
             } finally {
                 _isLoading.value = false
             }
         }
     }
 
-    private fun updateTodo(todo: TodoItem) {
+    fun refreshTodosWithRetry() {
         viewModelScope.launch {
+            var retryCount = 0
+            val maxRetries = 3
+            val delayMillis = 2000L
             _isLoading.value = true
-            try {
-                withContext(Dispatchers.IO) {
-                    updateTodoUseCase(todo)
+            while (retryCount < maxRetries) {
+                try {
+                    withContext(Dispatchers.IO) {
+                        getTodosUseCase().collect { todosList ->
+                            _todos.value = todosList
+                        }
+                    }
+                    _isError.value = false
+                    break
+                } catch (e: Exception) {
+                    retryCount++
+                    Log.e("TodoListViewModel", "Error fetching todos, retry $retryCount", e)
+                    if (retryCount == maxRetries) {
+                        _errorMessage.value = "Error fetching todos"
+                        _isError.value = true
+                    } else {
+                        delay(delayMillis)
+                    }
+                } finally {
+                    _isLoading.value = false
                 }
-                _todos.value = _todos.value.map {
-                    if (it.id == todo.id) todo else it
-                }
-            } catch (e: Exception) {
-                Log.e("TodoListViewModel", "Error updating todo", e)
-                _errorMessage.value = "Something went wrong"
-            } finally {
-                _isLoading.value = false
             }
-        }
-    }
-
-    fun updateAllTodos(todos: List<TodoItem>) {
-        viewModelScope.launch {
-            _isLoading.value = true
-            try {
-                withContext(Dispatchers.IO) {
-                    updateAllTodosUseCase(todos)
-                }
-                _todos.value = todos
-            } catch (e: Exception) {
-                Log.e("TodoListViewModel", "Error updating all todos", e)
-                _errorMessage.value = "Something went wrong"
-            } finally {
-                _isLoading.value = false
-            }
-        }
-    }
-
-    fun deleteTodo(todoId: String) {
-        viewModelScope.launch {
-            _isLoading.value = true
-            try {
-                withContext(Dispatchers.IO) {
-                    deleteTodoUseCase(todoId)
-                }
-                _todos.value = _todos.value.filterNot { it.id == todoId }
-            } catch (e: Exception) {
-                Log.e("TodoListViewModel", "Error deleting todo", e)
-                _errorMessage.value = "Something went wrong"
-            } finally {
-                _isLoading.value = false
-            }
-        }
-    }
-
-    fun refreshTodos() {
-        viewModelScope.launch {
-            getAllTodos()
         }
     }
 
     fun completeTodo(todoId: String) {
         viewModelScope.launch {
             try {
+                // Update the UI immediately
                 _todos.value.find { it.id == todoId }?.let { todo ->
                     val updatedTodo = todo.copy(isCompleted = !todo.isCompleted)
-                    updateTodo(updatedTodo)
+                    _todos.value = _todos.value.map {
+                        if (it.id == todoId) updatedTodo else it
+                    }
+
+                    // Perform the network update in the background
+                    withContext(Dispatchers.IO) {
+                        updateTodoUseCase(updatedTodo)
+                    }
                 }
             } catch (e: Exception) {
                 Log.e("TodoListViewModel", "Error completing todo", e)
                 _errorMessage.value = "Something went wrong"
+            }
+        }
+    }
+
+    fun deleteTodo(todoId: String) {
+        viewModelScope.launch {
+            try {
+                // Remove the todo from the list immediately
+                _todos.value = _todos.value.filterNot { it.id == todoId }
+
+                // Perform the network delete in the background
+                withContext(Dispatchers.IO) {
+                    deleteTodoUseCase(todoId)
+                }
+            } catch (e: Exception) {
+                Log.e("TodoListViewModel", "Error deleting todo", e)
+                _errorMessage.value = "Error deleting todo"
             }
         }
     }

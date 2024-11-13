@@ -4,13 +4,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
-import com.tisenres.yandextodoapp.domain.entity.Importance
 import com.tisenres.yandextodoapp.presentation.screens.todolist.TodoListScreen
 import com.tisenres.yandextodoapp.presentation.screens.tododetails.TodoDetailsScreen
 import com.tisenres.yandextodoapp.presentation.screens.tododetails.TodoDetailsViewModel
@@ -50,15 +47,10 @@ class MainActivity : ComponentActivity() {
                         val todoText =
                             backStackEntry.arguments?.getString("todoText") ?: return@composable
                         val viewModel = hiltViewModel<TodoDetailsViewModel>()
-                        viewModel.getTodoById(todoId)
-
-                        val todoState by viewModel.todo.collectAsState()
 
                         TodoDetailsScreen(
                             todoId = todoId,
                             initialText = todoText,
-                            initialImportance = todoState?.importance ?: Importance.NORMAL,
-                            initialDeadline = todoState?.deadline,
                             isEditing = true,
                             onSaveClick = { text, importance, deadline ->
                                 viewModel.updateTodo(todoId, text, importance, deadline)
@@ -71,7 +63,7 @@ class MainActivity : ComponentActivity() {
                             onCloseClick = {
                                 navController.popBackStack()
                             },
-                            viewModel = hiltViewModel()
+                            viewModel = viewModel
                         )
                     }
 
@@ -81,8 +73,6 @@ class MainActivity : ComponentActivity() {
                         TodoDetailsScreen(
                             todoId = "",
                             initialText = "",
-                            initialImportance = Importance.NORMAL,
-                            initialDeadline = null,
                             isEditing = false,
                             onSaveClick = { text, importance, deadline ->
                                 viewModel.createTodo(text, importance, deadline)

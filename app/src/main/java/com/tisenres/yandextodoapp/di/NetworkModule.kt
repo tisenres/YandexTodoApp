@@ -50,8 +50,8 @@ object NetworkModule {
         errorHandlingInterceptor: ErrorHandlingInterceptor
     ): OkHttpClient {
         return OkHttpClient.Builder()
-            .addInterceptor(headerInterceptor)
             .addInterceptor(errorHandlingInterceptor)
+            .addInterceptor(headerInterceptor)
             .addInterceptor(loggingInterceptor)
             .build()
     }

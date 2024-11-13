@@ -9,6 +9,7 @@ import com.tisenres.yandextodoapp.domain.entity.TodoItem
 import com.tisenres.yandextodoapp.domain.repository.TodoItemsRemoteRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import java.util.UUID
 import javax.inject.Inject
 
 class TodoItemsRemoteRepositoryImpl @Inject constructor(
@@ -30,9 +31,9 @@ class TodoItemsRemoteRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getTodoItemById(id: String) = flow {
-        val response = todoApi.getTodos()
+        val response = todoApi.getTodoById(UUID.fromString(id))
         appPreference.setCurrentRevision(response.revision)
-        emit(response.todoList.find { it.id.toString() == id }?.toDomainModel())
+        emit(response.element.toDomainModel())
     }
 
     override suspend fun updateTodoItem(item: TodoItem) {
