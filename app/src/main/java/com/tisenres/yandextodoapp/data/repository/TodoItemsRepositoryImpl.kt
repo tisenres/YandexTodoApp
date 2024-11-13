@@ -1,7 +1,10 @@
 package com.tisenres.yandextodoapp.data.repository
 
 import com.tisenres.yandextodoapp.data.remote.TodoApi
+import com.tisenres.yandextodoapp.data.remote.dto.TodoListDto
+import com.tisenres.yandextodoapp.data.remote.dto.TodoRequestDto
 import com.tisenres.yandextodoapp.data.remote.mappers.toDomainModel
+import com.tisenres.yandextodoapp.data.remote.mappers.toNetworkModel
 import com.tisenres.yandextodoapp.domain.entity.Importance
 import com.tisenres.yandextodoapp.domain.entity.TodoItem
 import com.tisenres.yandextodoapp.domain.repository.TodoItemsRepository
@@ -31,8 +34,10 @@ class TodoItemsRepositoryImpl @Inject constructor(
     override suspend fun updateTodoItem(item: TodoItem) {
     }
 
-    override suspend fun addTodoItem(item: TodoItem) {
-        items.value += item
+    override suspend fun createTodo(item: TodoItem) {
+        todoApi.createTodo(
+            TodoRequestDto(item.toNetworkModel())
+        )
     }
 
     override suspend fun deleteTodoItem(id: String) {

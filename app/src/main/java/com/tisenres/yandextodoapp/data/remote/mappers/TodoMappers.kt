@@ -4,6 +4,7 @@ import com.tisenres.yandextodoapp.data.remote.dto.TodoDto
 import com.tisenres.yandextodoapp.domain.entity.Importance
 import com.tisenres.yandextodoapp.domain.entity.TodoItem
 import java.util.Date
+import java.util.UUID
 
 fun TodoDto.toDomainModel(): TodoItem {
     return TodoItem(
@@ -14,6 +15,20 @@ fun TodoDto.toDomainModel(): TodoItem {
         isCompleted = done,
         createdAt = Date(createdAt * 1000L),
         modifiedAt = Date(changedAt * 1000L)
+    )
+}
+
+fun TodoItem.toNetworkModel(): TodoDto {
+    return TodoDto(
+        id = UUID.fromString(id),
+        text = text,
+        importance = "low",
+        deadline = deadline?.time?.div(1000)?.toInt() ?: 0,
+        done = isCompleted,
+        color = null,
+        createdAt = (createdAt.time / 1000).toInt(),
+        changedAt = modifiedAt?.time?.div(1000)?.toInt() ?: 0,
+        lastUpdatedBy = "device123"
     )
 }
 

@@ -1,17 +1,18 @@
-    package com.tisenres.yandextodoapp.di
+package com.tisenres.yandextodoapp.di
 
 import com.tisenres.yandextodoapp.BuildConfig
+import com.tisenres.yandextodoapp.data.local.preference.AppPreference
 import com.tisenres.yandextodoapp.data.remote.TodoApi
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import okhttp3.CertificatePinner
-import okhttp3.Interceptor
+import com.tisenres.yandextodoapp.data.remote.interceptors.ErrorHandlingInterceptor
+import com.tisenres.yandextodoapp.data.remote.interceptors.HeaderInterceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 @Module
@@ -28,39 +29,38 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideHeaderInterceptor(): Interceptor {
-        return Interceptor { chain ->
-            val originalRequest = chain.request()
-            val token = BuildConfig.TOKEN
-            val requestWithHeaders = originalRequest.newBuilder()
-                .addHeader(
-                    "Authorization",
-                    "OAuth: $token"
-                )
-                .build()
-            chain.proceed(requestWithHeaders)
-        }
+    fun provideHeaderInterceptor(preferences: AppPreference): HeaderInterceptor {
+        return HeaderInterceptor(
+            tokenProvider = { BuildConfig.TOKEN },
+            revisionProvider = { preferences.getCurrentRevision() }
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideErrorHandlingInterceptor(): ErrorHandlingInterceptor {
+        return ErrorHandlingInterceptor()
     }
 
     @Provides
     @Singleton
     fun provideOkHttpClient(
         loggingInterceptor: HttpLoggingInterceptor,
-        headerInterceptor: Interceptor
+        headerInterceptor: HeaderInterceptor,
+        errorHandlingInterceptor: ErrorHandlingInterceptor
     ): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(headerInterceptor)
             .addInterceptor(loggingInterceptor)
+            .addInterceptor(errorHandlingInterceptor)
             .build()
     }
 
     @Provides
     @Singleton
-    fun provideRetrofit(
-        okHttpClient: OkHttpClient,
-    ): Retrofit {
+    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("https://beta.mrdekk.ru/todo/")
+            .baseUrl("https://hive.mrdekk.ru/todo/")
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()

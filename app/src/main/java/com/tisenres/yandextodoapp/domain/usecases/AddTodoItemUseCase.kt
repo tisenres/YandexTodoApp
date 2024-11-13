@@ -8,6 +8,6 @@ class AddTodoItemUseCase @Inject constructor(
     private val repository: TodoItemsRepository
 ) {
     suspend operator fun invoke(todoItem: TodoItem) {
-        repository.addTodoItem(todoItem)
+        repository.createTodo(todoItem)
     }
 }

@@ -5,10 +5,12 @@ import androidx.lifecycle.viewModelScope
 import com.tisenres.yandextodoapp.domain.entity.TodoItem
 import com.tisenres.yandextodoapp.domain.usecases.GetTodosUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,8 +27,10 @@ class TodoListViewModel @Inject constructor(
 
     private fun getAllTodos() {
         viewModelScope.launch {
-            getTodosUseCase().collect { todosList ->
-                _todos.value = todosList
+            withContext(Dispatchers.IO) {
+                getTodosUseCase().collect { todosList ->
+                    _todos.value = todosList
+                }
             }
         }
     }
