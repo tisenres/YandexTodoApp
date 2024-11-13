@@ -51,7 +51,7 @@ class TodoListViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 Log.e("TodoListViewModel", "Error fetching todos", e)
-                _errorMessage.value = e.message ?: "Something went wrong"
+                _errorMessage.value = "Something went wrong"
             } finally {
                 _isLoading.value = false
             }
@@ -70,7 +70,7 @@ class TodoListViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 Log.e("TodoListViewModel", "Error updating todo", e)
-                _errorMessage.value = e.message ?: "Something went wrong"
+                _errorMessage.value = "Something went wrong"
             } finally {
                 _isLoading.value = false
             }
@@ -87,7 +87,7 @@ class TodoListViewModel @Inject constructor(
                 _todos.value = todos
             } catch (e: Exception) {
                 Log.e("TodoListViewModel", "Error updating all todos", e)
-                _errorMessage.value = e.message ?: "Something went wrong"
+                _errorMessage.value = "Something went wrong"
             } finally {
                 _isLoading.value = false
             }
@@ -104,7 +104,7 @@ class TodoListViewModel @Inject constructor(
                 _todos.value = _todos.value.filterNot { it.id == todoId }
             } catch (e: Exception) {
                 Log.e("TodoListViewModel", "Error deleting todo", e)
-                _errorMessage.value = e.message ?: "Something went wrong"
+                _errorMessage.value = "Something went wrong"
             } finally {
                 _isLoading.value = false
             }
@@ -126,7 +126,7 @@ class TodoListViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 Log.e("TodoListViewModel", "Error completing todo", e)
-                _errorMessage.value = e.message ?: "Something went wrong"
+                _errorMessage.value = "Something went wrong"
             }
         }
     }

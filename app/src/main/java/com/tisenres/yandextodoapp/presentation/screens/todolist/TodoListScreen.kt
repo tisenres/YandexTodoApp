@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
@@ -24,7 +25,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tisenres.yandextodoapp.R
 import com.tisenres.yandextodoapp.domain.entity.Importance
 import com.tisenres.yandextodoapp.domain.entity.TodoItem
@@ -108,41 +108,50 @@ fun TodoListContent(
                         containerColor = LocalExtendedColors.current.elevatedBackground,
                         contentColor = LocalExtendedColors.current.red,
                     )
-                }
+                },
             )
-        },
-        modifier = modifier
+        }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
+        Box(
+            modifier = modifier
                 .fillMaxSize()
-                .padding(paddingValues)
                 .background(LocalExtendedColors.current.primaryBackground)
+                .padding(paddingValues)
         ) {
-            HeaderAndCompletedTodos(
-                completedTodos = todos.count { it.isCompleted },
-                onEyeClick = {}
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            TodoList(
-                todos = todos,
-                onTodoClick = onTodoClick,
-                onCompleteTodo = onCompleteTodo,
-                onCreateTodoClick = onCreateTodoClick,
-                onDeleteTodo = onDeleteTodo,
-                modifier = Modifier.weight(1f),
-                isLoading = isLoading,
-                viewModel = viewModel
-            )
-
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .wrapContentSize(Alignment.Center)
-                    .background(Color.Black.copy(alpha = 0.5f))
-            )
+//                    .padding(paddingValues)
+//                    .background(LocalExtendedColors.current.primaryBackground)
+            ) {
+                HeaderAndCompletedTodos(
+                    completedTodos = todos.count { it.isCompleted },
+                    onEyeClick = {}
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                TodoList(
+                    todos = todos,
+                    onTodoClick = onTodoClick,
+                    onCompleteTodo = onCompleteTodo,
+                    onCreateTodoClick = onCreateTodoClick,
+                    onDeleteTodo = onDeleteTodo,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 8.dp)
+                    ,
+                    isLoading = isLoading,
+                    viewModel = viewModel
+                )
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .wrapContentSize(Alignment.Center)
+                        .background(Color.Black.copy(alpha = 0.5f))
+                )
+            }
         }
     }
 }
@@ -223,11 +232,11 @@ fun TodoList(
         }
     ) {
 
-
         LazyColumn(
             contentPadding = PaddingValues(vertical = 8.dp),
             modifier = modifier
                 .fillMaxWidth()
+                .clip(RoundedCornerShape(8.dp))
                 .background(LocalExtendedColors.current.secondaryBackground)
         ) {
             items(
