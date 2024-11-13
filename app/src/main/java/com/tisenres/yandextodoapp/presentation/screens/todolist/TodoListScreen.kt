@@ -11,6 +11,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,6 +24,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tisenres.yandextodoapp.R
 import com.tisenres.yandextodoapp.domain.entity.Importance
 import com.tisenres.yandextodoapp.domain.entity.TodoItem
@@ -34,14 +38,16 @@ fun TodoListScreen(
     onCreateTodoClick: () -> Unit
 ) {
     val todos by viewModel.todos.collectAsState()
-
+    val isLoading by viewModel.isLoading.collectAsState()
     TodoListContent(
         todos = todos,
         onTodoClick = onTodoClick,
         onCreateTodoClick = onCreateTodoClick,
         onCompleteTodo = { todoId -> viewModel.completeTodo(todoId) },
         onDeleteTodo = { todoId -> viewModel.deleteTodo(todoId) },
-        modifier = Modifier.fillMaxSize()
+        isLoading = isLoading,
+        modifier = Modifier.fillMaxSize(),
+        viewModel = viewModel
     )
 }
 
@@ -52,7 +58,9 @@ fun TodoListContent(
     onCreateTodoClick: () -> Unit,
     onCompleteTodo: (String) -> Unit,
     onDeleteTodo: (String) -> Unit,
-    modifier: Modifier = Modifier
+    isLoading: Boolean,
+    modifier: Modifier = Modifier,
+    viewModel: TodoListViewModel
 ) {
     Scaffold(
         floatingActionButton = {
@@ -93,6 +101,15 @@ fun TodoListContent(
                 onCreateTodoClick = onCreateTodoClick,
                 onDeleteTodo = onDeleteTodo,
                 modifier = Modifier.weight(1f),
+                isLoading = isLoading,
+                viewModel = viewModel
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .wrapContentSize(Alignment.Center)
+                    .background(Color.Black.copy(alpha = 0.5f))
             )
         }
     }
@@ -144,6 +161,7 @@ fun HeaderAndCompletedTodos(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TodoList(
     todos: List<TodoItem>,
@@ -152,95 +170,117 @@ fun TodoList(
     onCreateTodoClick: () -> Unit,
     onDeleteTodo: (String) -> Unit,
     modifier: Modifier = Modifier,
+    isLoading: Boolean,
+    viewModel: TodoListViewModel,
 ) {
-    LazyColumn(
-        contentPadding = PaddingValues(vertical = 8.dp),
-        modifier = modifier
-            .fillMaxWidth()
-            .background(LocalExtendedColors.current.secondaryBackground)
-    ) {
-        items(
-            items = todos,
-            key = { it.id }
-        ) { item ->
-            val swipeState = rememberSwipeToDismissBoxState()
 
-            SwipeToDismissBox(
-                state = swipeState,
-                modifier = Modifier.animateContentSize(),
-                backgroundContent = {
-                    val dismissDirection = swipeState.dismissDirection
-                    val (icon, alignment, color) = when (dismissDirection) {
-                        SwipeToDismissBoxValue.EndToStart -> {
-                            Triple(
-                                Icons.Filled.Delete,
-                                Alignment.CenterEnd,
-                                LocalExtendedColors.current.error
-                            )
-                        }
+    val pullRefreshState = rememberPullToRefreshState()
 
-                        SwipeToDismissBoxValue.StartToEnd -> {
-                            Triple(
-                                Icons.Filled.Done,
-                                Alignment.CenterStart,
-                                LocalExtendedColors.current.green
-                            )
-                        }
-
-                        else -> {
-                            Triple(null, Alignment.Center, Color.Transparent)
-                        }
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(color)
-                            .padding(horizontal = 20.dp),
-                        contentAlignment = alignment
-                    ) {
-                        if (icon != null) {
-                            Icon(
-                                imageVector = icon,
-                                contentDescription = null,
-                                tint = Color.White
-                            )
-                        }
-                    }
-                },
-                content = {
-                    TodoItemCell(
-                        text = item.text,
-                        importance = item.importance,
-                        isCompleted = item.isCompleted,
-                        onClick = { text -> onTodoClick(item.id, text) },
-                        onCheckedChange = {}
-                    )
-                }
+    PullToRefreshBox(
+        state = pullRefreshState,
+        onRefresh = { viewModel.refreshTodos() },
+        isRefreshing = isLoading,
+        indicator = {
+            PullToRefreshDefaults.Indicator(
+                state = pullRefreshState,
+                isRefreshing = isLoading,
+                color = Color(0xFF32B768),
+                containerColor = Color.White,
+                modifier = Modifier.align(Alignment.TopCenter)
             )
+        }
+    ) {
 
-            when (swipeState.currentValue) {
-                SwipeToDismissBoxValue.EndToStart -> {
-                    LaunchedEffect(Unit) {
-                        onDeleteTodo(item.id)
+
+        LazyColumn(
+            contentPadding = PaddingValues(vertical = 8.dp),
+            modifier = modifier
+                .fillMaxWidth()
+                .background(LocalExtendedColors.current.secondaryBackground)
+        ) {
+            items(
+                items = todos,
+                key = { it.id }
+            ) { item ->
+                val swipeState = rememberSwipeToDismissBoxState()
+
+                SwipeToDismissBox(
+                    state = swipeState,
+                    modifier = Modifier.animateContentSize(),
+                    backgroundContent = {
+                        val dismissDirection = swipeState.dismissDirection
+                        val (icon, alignment, color) = when (dismissDirection) {
+                            SwipeToDismissBoxValue.EndToStart -> {
+                                Triple(
+                                    Icons.Filled.Delete,
+                                    Alignment.CenterEnd,
+                                    LocalExtendedColors.current.error
+                                )
+                            }
+
+                            SwipeToDismissBoxValue.StartToEnd -> {
+                                Triple(
+                                    Icons.Filled.Done,
+                                    Alignment.CenterStart,
+                                    LocalExtendedColors.current.green
+                                )
+                            }
+
+                            else -> {
+                                Triple(null, Alignment.Center, Color.Transparent)
+                            }
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(color)
+                                .padding(horizontal = 20.dp),
+                            contentAlignment = alignment
+                        ) {
+                            if (icon != null) {
+                                Icon(
+                                    imageVector = icon,
+                                    contentDescription = null,
+                                    tint = Color.White
+                                )
+                            }
+                        }
+                    },
+                    content = {
+                        TodoItemCell(
+                            text = item.text,
+                            importance = item.importance,
+                            isCompleted = item.isCompleted,
+                            onClick = { text -> onTodoClick(item.id, text) },
+                            onCheckedChange = {}
+                        )
                     }
-                }
+                )
 
-                SwipeToDismissBoxValue.StartToEnd -> {
-                    LaunchedEffect(Unit) {
-                        onCompleteTodo(item.id)
-                        swipeState.snapTo(SwipeToDismissBoxValue.Settled)
+                when (swipeState.currentValue) {
+                    SwipeToDismissBoxValue.EndToStart -> {
+                        LaunchedEffect(Unit) {
+                            onDeleteTodo(item.id)
+                        }
                     }
-                }
 
-                else -> {
+                    SwipeToDismissBoxValue.StartToEnd -> {
+                        LaunchedEffect(Unit) {
+                            onCompleteTodo(item.id)
+                            swipeState.snapTo(SwipeToDismissBoxValue.Settled)
+                        }
+                    }
 
+                    else -> {
+
+                    }
                 }
             }
-        }
 
-        item {
-            newTaskRow(onCreateTodoClick = onCreateTodoClick)
+            item {
+                newTaskRow(onCreateTodoClick = onCreateTodoClick)
+            }
         }
     }
 }
@@ -283,16 +323,37 @@ fun NewTaskRowPreview() {
 @Composable
 fun TodoListPreview() {
     val sampleTodos = listOf(
-        TodoItem(id = "1", text = "Задача 1", importance = Importance.NORMAL, isCompleted = false, createdAt = Date()),
-        TodoItem(id = "2", text = "Задача 2", importance = Importance.HIGH, isCompleted = true, createdAt = Date()),
-        TodoItem(id = "3", text = "Задача 3", importance = Importance.LOW, isCompleted = false, createdAt = Date())
+        TodoItem(
+            id = "1",
+            text = "Задача 1",
+            importance = Importance.NORMAL,
+            isCompleted = false,
+            createdAt = Date()
+        ),
+        TodoItem(
+            id = "2",
+            text = "Задача 2",
+            importance = Importance.HIGH,
+            isCompleted = true,
+            createdAt = Date()
+        ),
+        TodoItem(
+            id = "3",
+            text = "Задача 3",
+            importance = Importance.LOW,
+            isCompleted = false,
+            createdAt = Date()
+        )
     )
     TodoList(
         todos = sampleTodos,
         onTodoClick = { _, _ -> },
         onCompleteTodo = {},
         onCreateTodoClick = {},
-        onDeleteTodo = {}
+        onDeleteTodo = {},
+        modifier = Modifier,
+        isLoading = false,
+        viewModel = hiltViewModel()
     )
 }
 
@@ -300,15 +361,35 @@ fun TodoListPreview() {
 @Composable
 fun TodoListContentPreview() {
     val sampleTodos = listOf(
-        TodoItem(id = "1", text = "Задача 1", importance = Importance.NORMAL, isCompleted = false, createdAt = Date()),
-        TodoItem(id = "2", text = "Задача 2", importance = Importance.HIGH, isCompleted = true, createdAt = Date()),
-        TodoItem(id = "3", text = "Задача 3", importance = Importance.LOW, isCompleted = false, createdAt = Date())
+        TodoItem(
+            id = "1",
+            text = "Задача 1",
+            importance = Importance.NORMAL,
+            isCompleted = false,
+            createdAt = Date()
+        ),
+        TodoItem(
+            id = "2",
+            text = "Задача 2",
+            importance = Importance.HIGH,
+            isCompleted = true,
+            createdAt = Date()
+        ),
+        TodoItem(
+            id = "3",
+            text = "Задача 3",
+            importance = Importance.LOW,
+            isCompleted = false,
+            createdAt = Date()
+        )
     )
     TodoListContent(
         todos = sampleTodos,
-        onTodoClick = {_, _ -> },
+        onTodoClick = { _, _ -> },
         onCreateTodoClick = {},
         onCompleteTodo = {},
-        onDeleteTodo = {}
+        onDeleteTodo = {},
+        isLoading = true,
+        viewModel = hiltViewModel()
     )
 }

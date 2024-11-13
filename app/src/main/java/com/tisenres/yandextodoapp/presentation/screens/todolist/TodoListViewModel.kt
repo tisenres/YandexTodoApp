@@ -22,17 +22,37 @@ class TodoListViewModel @Inject constructor(
     private val _todos: MutableStateFlow<List<TodoItem>> = MutableStateFlow(emptyList())
     val todos: StateFlow<List<TodoItem>> = _todos.asStateFlow()
 
+    private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    private val _error: MutableStateFlow<String?> = MutableStateFlow(null)
+    val error: StateFlow<String?> = _error.asStateFlow()
+
     init {
         getAllTodos()
     }
 
     private fun getAllTodos() {
         viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                getTodosUseCase().collect { todosList ->
-                    _todos.value = todosList
+            _isLoading.value = true
+            try {
+                withContext(Dispatchers.IO) {
+                    getTodosUseCase().collect { todosList ->
+                        _todos.value = todosList
+                    }
                 }
+            } catch (e: Exception) {
+                Log.e("TodoListViewModel", "Error fetching todos", e)
+                _error.value = e.message
+            } finally {
+                _isLoading.value = false
             }
+        }
+    }
+
+    fun refreshTodos() {
+        viewModelScope.launch {
+            getAllTodos()
         }
     }
 
@@ -47,7 +67,6 @@ class TodoListViewModel @Inject constructor(
     }
 
     fun deleteTodo(todoId: String) {
-        _todos.value = todos.value.filterNot { it.id == todoId }
+        _todos.value = _todos.value.filterNot { it.id == todoId }
     }
 }
-
