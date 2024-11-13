@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">YandexTodoApp</string>
+    <string name="close">Закрыть</string>
+    <string name="save">Сохранить</string>
+    <string name="what_to_do">Сделать что-то...</string>
+    <string name="error_empty_field">Поле не может быть пустым</string>
+    <string name="importance">Важность</string>
+    <string name="do_until">Сделать до</string>
+    <string name="delete">Удалить\n</string>
+    <string name="add_todo">Создать Todo</string>
+    <string name="error_loading_data">Ошибка загрузки данных. Попробуйте позже</string>
+    <string name="retry">Попробовать снова</string>
 </resources>

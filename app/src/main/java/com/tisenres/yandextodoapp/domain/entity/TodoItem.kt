@@ -4,10 +4,10 @@ import java.util.Date
 
 data class TodoItem(
     val id: String,
-    val text: String,
-    val importance: Importance,
-    val deadline: Date? = null,
-    val isCompleted: Boolean,
+    var text: String,
+    var importance: Importance,
+    var deadline: Date? = null,
+    var isCompleted: Boolean,
     val createdAt: Date,
-    val modifiedAt: Date? = null
+    var modifiedAt: Date? = null
 )

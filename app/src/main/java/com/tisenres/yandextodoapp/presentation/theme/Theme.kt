@@ -31,7 +31,6 @@ data class ExtendedColors(
     val supportOverlay: Color
 )
 
-// Light and Dark custom colors
 val LightExtendedColors = ExtendedColors(
     primaryBackground = LightPrimaryBackground,
     secondaryBackground = LightSecondaryBackground,

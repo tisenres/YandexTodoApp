@@ -1,5 +1,8 @@
 package com.tisenres.yandextodoapp.presentation.screens.todolist
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.Network
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -7,16 +10,22 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -34,6 +43,43 @@ fun TodoListScreen(
     onCreateTodoClick: () -> Unit
 ) {
     val todos by viewModel.todos.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
+    val isError by viewModel.isError.collectAsState()
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    rememberCoroutineScope()
+
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let {
+            snackbarHostState.showSnackbar(
+                message = it,
+                duration = SnackbarDuration.Short
+            )
+            viewModel.clearErrorMessage()
+        }
+    }
+
+    val context = LocalContext.current
+    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val isConnected = remember { mutableStateOf(true) }
+
+    DisposableEffect(Unit) {
+        val networkCallback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                isConnected.value = true
+                viewModel.refreshTodosWithRetry()
+            }
+
+            override fun onLost(network: Network) {
+                isConnected.value = false
+            }
+        }
+        connectivityManager.registerDefaultNetworkCallback(networkCallback)
+        onDispose {
+            connectivityManager.unregisterNetworkCallback(networkCallback)
+        }
+    }
 
     TodoListContent(
         todos = todos,
@@ -41,7 +87,12 @@ fun TodoListScreen(
         onCreateTodoClick = onCreateTodoClick,
         onCompleteTodo = { todoId -> viewModel.completeTodo(todoId) },
         onDeleteTodo = { todoId -> viewModel.deleteTodo(todoId) },
-        modifier = Modifier.fillMaxSize()
+        isLoading = isLoading,
+        isError = isError,
+        onRetryClick = { viewModel.refreshTodosWithRetry() },
+        snackbarHostState = snackbarHostState,
+        modifier = Modifier.fillMaxSize(),
+        viewModel = viewModel
     )
 }
 
@@ -52,7 +103,12 @@ fun TodoListContent(
     onCreateTodoClick: () -> Unit,
     onCompleteTodo: (String) -> Unit,
     onDeleteTodo: (String) -> Unit,
-    modifier: Modifier = Modifier
+    isLoading: Boolean,
+    isError: Boolean,
+    onRetryClick: () -> Unit,
+    snackbarHostState: SnackbarHostState,
+    modifier: Modifier = Modifier,
+    viewModel: TodoListViewModel
 ) {
     Scaffold(
         floatingActionButton = {
@@ -66,34 +122,74 @@ fun TodoListContent(
             ) {
                 Icon(
                     painter = painterResource(R.drawable.add),
-                    contentDescription = "Add Todo",
+                    contentDescription = stringResource(R.string.add_todo),
                     tint = Color.White
                 )
             }
         },
-        modifier = modifier
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                snackbar = { snackbarData ->
+                    Snackbar(
+                        snackbarData = snackbarData,
+                        containerColor = LocalExtendedColors.current.elevatedBackground,
+                        contentColor = LocalExtendedColors.current.red,
+                    )
+                },
+            )
+        }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
+        Box(
+            modifier = modifier
                 .fillMaxSize()
-                .padding(paddingValues)
                 .background(LocalExtendedColors.current.primaryBackground)
+                .padding(paddingValues)
         ) {
-            HeaderAndCompletedTodos(
-                completedTodos = todos.count { it.isCompleted },
-                onEyeClick = {}
-            )
+            if (isError && todos.isEmpty()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = stringResource(R.string.error_loading_data),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = LocalExtendedColors.current.primaryLabel
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button(onClick = onRetryClick) {
+                        Text(text = stringResource(R.string.retry))
+                    }
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
+                    HeaderAndCompletedTodos(
+                        completedTodos = todos.count { it.isCompleted },
+                        onEyeClick = {}
+                    )
 
-            Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
-            TodoList(
-                todos = todos,
-                onTodoClick = onTodoClick,
-                onCompleteTodo = onCompleteTodo,
-                onCreateTodoClick = onCreateTodoClick,
-                onDeleteTodo = onDeleteTodo,
-                modifier = Modifier.weight(1f),
-            )
+                    TodoList(
+                        todos = todos,
+                        onTodoClick = onTodoClick,
+                        onCompleteTodo = onCompleteTodo,
+                        onCreateTodoClick = onCreateTodoClick,
+                        onDeleteTodo = onDeleteTodo,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 8.dp),
+                        isLoading = isLoading,
+                        viewModel = viewModel
+                    )
+                }
+            }
         }
     }
 }
@@ -144,6 +240,7 @@ fun HeaderAndCompletedTodos(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TodoList(
     todos: List<TodoItem>,
@@ -152,95 +249,119 @@ fun TodoList(
     onCreateTodoClick: () -> Unit,
     onDeleteTodo: (String) -> Unit,
     modifier: Modifier = Modifier,
+    isLoading: Boolean,
+    viewModel: TodoListViewModel,
 ) {
-    LazyColumn(
-        contentPadding = PaddingValues(vertical = 8.dp),
-        modifier = modifier
-            .fillMaxWidth()
-            .background(LocalExtendedColors.current.secondaryBackground)
-    ) {
-        items(
-            items = todos,
-            key = { it.id }
-        ) { item ->
-            val swipeState = rememberSwipeToDismissBoxState()
 
-            SwipeToDismissBox(
-                state = swipeState,
-                modifier = Modifier.animateContentSize(),
-                backgroundContent = {
-                    val dismissDirection = swipeState.dismissDirection
-                    val (icon, alignment, color) = when (dismissDirection) {
-                        SwipeToDismissBoxValue.EndToStart -> {
-                            Triple(
-                                Icons.Filled.Delete,
-                                Alignment.CenterEnd,
-                                LocalExtendedColors.current.error
-                            )
-                        }
+    val pullRefreshState = rememberPullToRefreshState()
 
-                        SwipeToDismissBoxValue.StartToEnd -> {
-                            Triple(
-                                Icons.Filled.Done,
-                                Alignment.CenterStart,
-                                LocalExtendedColors.current.green
-                            )
-                        }
-
-                        else -> {
-                            Triple(null, Alignment.Center, Color.Transparent)
-                        }
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(color)
-                            .padding(horizontal = 20.dp),
-                        contentAlignment = alignment
-                    ) {
-                        if (icon != null) {
-                            Icon(
-                                imageVector = icon,
-                                contentDescription = null,
-                                tint = Color.White
-                            )
-                        }
-                    }
-                },
-                content = {
-                    TodoItemCell(
-                        text = item.text,
-                        importance = item.importance,
-                        isCompleted = item.isCompleted,
-                        onClick = { text -> onTodoClick(item.id, text) },
-                        onCheckedChange = {}
-                    )
-                }
+    PullToRefreshBox(
+        state = pullRefreshState,
+        onRefresh = { viewModel.refreshTodosWithRetry() },
+        isRefreshing = isLoading,
+        indicator = {
+            PullToRefreshDefaults.Indicator(
+                state = pullRefreshState,
+                isRefreshing = isLoading,
+                color = Color(0xFF32B768),
+                containerColor = Color.White,
+                modifier = Modifier.align(Alignment.TopCenter)
             )
+        }
+    ) {
 
-            when (swipeState.currentValue) {
-                SwipeToDismissBoxValue.EndToStart -> {
-                    LaunchedEffect(Unit) {
-                        onDeleteTodo(item.id)
+        LazyColumn(
+            contentPadding = PaddingValues(vertical = 8.dp),
+            modifier = modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(8.dp))
+                .background(LocalExtendedColors.current.secondaryBackground)
+        ) {
+            items(
+                items = todos,
+                key = { it.id }
+            ) { item ->
+                val swipeState = rememberSwipeToDismissBoxState()
+
+                SwipeToDismissBox(
+                    state = swipeState,
+                    modifier = Modifier.animateContentSize(),
+                    backgroundContent = {
+                        val dismissDirection = swipeState.dismissDirection
+                        val (icon, alignment, color) = when (dismissDirection) {
+                            SwipeToDismissBoxValue.EndToStart -> {
+                                Triple(
+                                    Icons.Filled.Delete,
+                                    Alignment.CenterEnd,
+                                    LocalExtendedColors.current.error
+                                )
+                            }
+
+                            SwipeToDismissBoxValue.StartToEnd -> {
+                                Triple(
+                                    Icons.Filled.Done,
+                                    Alignment.CenterStart,
+                                    LocalExtendedColors.current.green
+                                )
+                            }
+
+                            else -> {
+                                Triple(null, Alignment.Center, Color.Transparent)
+                            }
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(color)
+                                .padding(horizontal = 20.dp),
+                            contentAlignment = alignment
+                        ) {
+                            if (icon != null) {
+                                Icon(
+                                    imageVector = icon,
+                                    contentDescription = null,
+                                    tint = Color.White
+                                )
+                            }
+                        }
+                    },
+                    content = {
+                        TodoItemCell(
+                            text = item.text,
+                            importance = item.importance,
+                            isCompleted = item.isCompleted,
+                            onClick = { text -> onTodoClick(item.id, text) },
+                            onCheckedChange = { checked ->
+                                onCompleteTodo(item.id)
+                            }
+                        )
                     }
-                }
+                )
 
-                SwipeToDismissBoxValue.StartToEnd -> {
-                    LaunchedEffect(Unit) {
-                        onCompleteTodo(item.id)
-                        swipeState.snapTo(SwipeToDismissBoxValue.Settled)
+                when (swipeState.currentValue) {
+                    SwipeToDismissBoxValue.EndToStart -> {
+                        LaunchedEffect(Unit) {
+                            onDeleteTodo(item.id)
+                        }
                     }
-                }
 
-                else -> {
+                    SwipeToDismissBoxValue.StartToEnd -> {
+                        LaunchedEffect(Unit) {
+                            onCompleteTodo(item.id)
+                            swipeState.snapTo(SwipeToDismissBoxValue.Settled)
+                        }
+                    }
 
+                    else -> {
+
+                    }
                 }
             }
-        }
 
-        item {
-            newTaskRow(onCreateTodoClick = onCreateTodoClick)
+            item {
+                newTaskRow(onCreateTodoClick = onCreateTodoClick)
+            }
         }
     }
 }
@@ -283,16 +404,37 @@ fun NewTaskRowPreview() {
 @Composable
 fun TodoListPreview() {
     val sampleTodos = listOf(
-        TodoItem(id = "1", text = "Задача 1", importance = Importance.NORMAL, isCompleted = false, createdAt = Date()),
-        TodoItem(id = "2", text = "Задача 2", importance = Importance.HIGH, isCompleted = true, createdAt = Date()),
-        TodoItem(id = "3", text = "Задача 3", importance = Importance.LOW, isCompleted = false, createdAt = Date())
+        TodoItem(
+            id = "1",
+            text = "Задача 1",
+            importance = Importance.NORMAL,
+            isCompleted = false,
+            createdAt = Date()
+        ),
+        TodoItem(
+            id = "2",
+            text = "Задача 2",
+            importance = Importance.HIGH,
+            isCompleted = true,
+            createdAt = Date()
+        ),
+        TodoItem(
+            id = "3",
+            text = "Задача 3",
+            importance = Importance.LOW,
+            isCompleted = false,
+            createdAt = Date()
+        )
     )
     TodoList(
         todos = sampleTodos,
         onTodoClick = { _, _ -> },
         onCompleteTodo = {},
         onCreateTodoClick = {},
-        onDeleteTodo = {}
+        onDeleteTodo = {},
+        modifier = Modifier,
+        isLoading = false,
+        viewModel = hiltViewModel()
     )
 }
 
@@ -300,15 +442,35 @@ fun TodoListPreview() {
 @Composable
 fun TodoListContentPreview() {
     val sampleTodos = listOf(
-        TodoItem(id = "1", text = "Задача 1", importance = Importance.NORMAL, isCompleted = false, createdAt = Date()),
-        TodoItem(id = "2", text = "Задача 2", importance = Importance.HIGH, isCompleted = true, createdAt = Date()),
-        TodoItem(id = "3", text = "Задача 3", importance = Importance.LOW, isCompleted = false, createdAt = Date())
+        TodoItem(
+            id = "1",
+            text = "Задача 1",
+            importance = Importance.NORMAL,
+            isCompleted = false,
+            createdAt = Date()
+        ),
+        TodoItem(
+            id = "2",
+            text = "Задача 2",
+            importance = Importance.HIGH,
+            isCompleted = true,
+            createdAt = Date()
+        ),
+        TodoItem(
+            id = "3",
+            text = "Задача 3",
+            importance = Importance.LOW,
+            isCompleted = false,
+            createdAt = Date()
+        )
     )
-    TodoListContent(
-        todos = sampleTodos,
-        onTodoClick = {_, _ -> },
-        onCreateTodoClick = {},
-        onCompleteTodo = {},
-        onDeleteTodo = {}
-    )
+//    TodoListContent(
+//        todos = sampleTodos,
+//        onTodoClick = { _, _ -> },
+//        onCreateTodoClick = {},
+//        onCompleteTodo = {},
+//        onDeleteTodo = {},
+//        isLoading = true,
+//        viewModel = hiltViewModel()
+//    )
 }

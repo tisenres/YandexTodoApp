@@ -1,10 +1,8 @@
 package com.tisenres.yandextodoapp.presentation.screens.todolist
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
@@ -17,7 +15,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.tisenres.yandextodoapp.R
 import com.tisenres.yandextodoapp.domain.entity.Importance
@@ -43,7 +40,8 @@ fun TodoItemCell(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = { onClick(text) })
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .animateContentSize(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Checkbox(
@@ -68,7 +66,7 @@ fun TodoItemCell(
                     Icon(
                         painter = painterResource(R.drawable.priority_high),
                         contentDescription = "High Priority",
-                        tint = Color.Red,
+                        tint = LocalExtendedColors.current.red,
                         modifier = Modifier.padding(end = 7.dp)
                     )
                 }
@@ -97,53 +95,6 @@ fun TodoItemCell(
             painter = painterResource(R.drawable.info_outline),
             contentDescription = "More Details",
             tint = LocalExtendedColors.current.tertiaryLabel,
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun TodoItemCellPreview() {
-    Column {
-        // Завершенная задача
-        TodoItemCell(
-            text = "Завершенная задача",
-            importance = Importance.NORMAL,
-            isCompleted = true,
-            onCheckedChange = {},
-            onClick = {}
-        )
-        // Задача с высоким приоритетом
-        TodoItemCell(
-            text = "Срочная задача с высоким приоритетом",
-            importance = Importance.HIGH,
-            isCompleted = false,
-            onCheckedChange = {},
-            onClick = {}
-        )
-        // Задача с обычным приоритетом
-        TodoItemCell(
-            text = "Обычная задача",
-            importance = Importance.NORMAL,
-            isCompleted = false,
-            onCheckedChange = {},
-            onClick = {}
-        )
-        // Задача с низким приоритетом
-        TodoItemCell(
-            text = "Задача с низким приоритетом",
-            importance = Importance.LOW,
-            isCompleted = false,
-            onCheckedChange = {},
-            onClick = {}
-        )
-        // Длинный текст задачи
-        TodoItemCell(
-            text = "Это очень длинный текст задачи, который должен быть ограничен тремя строками. Мы продолжаем писать, чтобы убедиться, что текст действительно обрезается после третьей строки и отображается многоточие в конце.",
-            importance = Importance.NORMAL,
-            isCompleted = false,
-            onCheckedChange = {},
-            onClick = {}
         )
     }
 }
