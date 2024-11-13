@@ -50,7 +50,6 @@ class MainActivity : ComponentActivity() {
 
                         TodoDetailsScreen(
                             todoId = todoId,
-                            initialText = todoText,
                             isEditing = true,
                             onSaveClick = { text, importance, deadline ->
                                 viewModel.updateTodo(todoId, text, importance, deadline)
@@ -72,7 +71,6 @@ class MainActivity : ComponentActivity() {
 
                         TodoDetailsScreen(
                             todoId = "",
-                            initialText = "",
                             isEditing = false,
                             onSaveClick = { text, importance, deadline ->
                                 viewModel.createTodo(text, importance, deadline)

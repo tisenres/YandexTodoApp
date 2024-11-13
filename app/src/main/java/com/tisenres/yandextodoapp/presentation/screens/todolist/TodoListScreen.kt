@@ -48,7 +48,7 @@ fun TodoListScreen(
     val isError by viewModel.isError.collectAsState()
 
     val snackbarHostState = remember { SnackbarHostState() }
-    val coroutineScope = rememberCoroutineScope()
+    rememberCoroutineScope()
 
     LaunchedEffect(errorMessage) {
         errorMessage?.let {

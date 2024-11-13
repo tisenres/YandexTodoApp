@@ -8,7 +8,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
@@ -25,7 +24,6 @@ import java.util.*
 @Composable
 fun TodoDetailsScreen(
     todoId: String,
-    initialText: String = "",
     isEditing: Boolean = false,
     onSaveClick: (String, Importance, Date?) -> Unit,
     onDeleteClick: () -> Unit,
@@ -33,10 +31,9 @@ fun TodoDetailsScreen(
     viewModel: TodoDetailsViewModel
 ) {
     val todoItem by viewModel.todo.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
 
-    var text by remember { mutableStateOf(TextFieldValue(initialText)) }
+    var text by remember { mutableStateOf(TextFieldValue("")) }
     var importance by remember { mutableStateOf(Importance.NORMAL) }
     var deadline by remember { mutableStateOf<Date?>(null) }
     var isDatePickerVisible by remember { mutableStateOf(false) }
@@ -50,13 +47,11 @@ fun TodoDetailsScreen(
         }
     }
 
-    // Update importance and deadline when todoItem is loaded
     LaunchedEffect(todoItem) {
         if (todoItem != null) {
+            text = TextFieldValue(todoItem!!.text)
             importance = todoItem!!.importance
             deadline = todoItem!!.deadline
-            // Do NOT update text here, as it's passed via navigation
-            // text = TextFieldValue(todoItem.text)
         }
     }
 
@@ -86,6 +81,7 @@ fun TodoDetailsScreen(
                     TextButton(
                         onClick = {
                             if (text.text.isNotBlank()) {
+                                Log.d("TodoDetailsScreen", "Saving with importance: $importance")
                                 onSaveClick(text.text, importance, deadline)
                             }
                         },
@@ -107,7 +103,6 @@ fun TodoDetailsScreen(
                 modifier = Modifier
                     .padding(paddingValues)
             ) {
-                // Text input field with validation
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -137,18 +132,9 @@ fun TodoDetailsScreen(
                                 }
                             }
                         )
-//                        if (text.text.isEmpty()) {
-//                            Text(
-//                                text = stringResource(R.string.error_empty_field),
-//                                color = MaterialTheme.colorScheme.error,
-//                                style = MaterialTheme.typography.bodySmall,
-//                                modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
-//                            )
-//                        }
                     }
                 }
 
-                // Importance selection
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
@@ -168,7 +154,6 @@ fun TodoDetailsScreen(
 
                 HorizontalDivider()
 
-                // Deadline selection
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
@@ -202,7 +187,6 @@ fun TodoDetailsScreen(
                     )
                 }
 
-                // Show date picker dialog if needed
                 if (isDatePickerVisible) {
                     CustomDatePickerDialog(
                         initialDate = deadline ?: Date(),

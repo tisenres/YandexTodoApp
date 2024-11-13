@@ -97,14 +97,12 @@ class TodoListViewModel @Inject constructor(
     fun completeTodo(todoId: String) {
         viewModelScope.launch {
             try {
-                // Update the UI immediately
                 _todos.value.find { it.id == todoId }?.let { todo ->
                     val updatedTodo = todo.copy(isCompleted = !todo.isCompleted)
                     _todos.value = _todos.value.map {
                         if (it.id == todoId) updatedTodo else it
                     }
 
-                    // Perform the network update in the background
                     withContext(Dispatchers.IO) {
                         updateTodoUseCase(updatedTodo)
                     }
@@ -119,10 +117,8 @@ class TodoListViewModel @Inject constructor(
     fun deleteTodo(todoId: String) {
         viewModelScope.launch {
             try {
-                // Remove the todo from the list immediately
                 _todos.value = _todos.value.filterNot { it.id == todoId }
 
-                // Perform the network delete in the background
                 withContext(Dispatchers.IO) {
                     deleteTodoUseCase(todoId)
                 }
