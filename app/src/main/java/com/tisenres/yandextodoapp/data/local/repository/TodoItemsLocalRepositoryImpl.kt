@@ -5,13 +5,13 @@ import com.tisenres.yandextodoapp.domain.repository.TodoItemsLocalRepository
 import javax.inject.Inject
 
 class TodoItemsLocalRepositoryImpl @Inject constructor(
-    private val preference: AppPreferences
+    private val preferences: AppPreferences
 ) : TodoItemsLocalRepository {
     override suspend fun getCurrentRevision(): Int {
-        return preference.getCurrentRevision()
+        return preferences.getCurrentRevision()
     }
 
     override suspend fun setCurrentRevision(revision: Int) {
-        preference.setCurrentRevision(revision)
+        preferences.setCurrentRevision(revision)
     }
 }

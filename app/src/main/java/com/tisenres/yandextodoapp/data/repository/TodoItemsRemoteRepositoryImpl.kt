@@ -30,13 +30,16 @@ class TodoItemsRemoteRepositoryImpl @Inject constructor(
 
     override suspend fun createTodo(item: TodoItem, revision: Int): Int {
         val response = todoApi.createTodo(
-            TodoRequestDto(item.toNetworkModel())
+            request = TodoRequestDto(item.toNetworkModel()),
+            revision = revision
         )
         return response.revision
     }
 
     override suspend fun getTodoItemById(id: String): Pair<Flow<TodoItem?>, Int> {
-        val response = todoApi.getTodoById(UUID.fromString(id))
+        val response = todoApi.getTodoById(
+            todoId = UUID.fromString(id)
+        )
 
         val todo = response.element?.toDomainModel()
         val revision = response.revision
@@ -50,22 +53,29 @@ class TodoItemsRemoteRepositoryImpl @Inject constructor(
 
     override suspend fun updateTodoItem(item: TodoItem, revision: Int): Int {
         val response = todoApi.updateTodoById(
-            TodoRequestDto(item.toNetworkModel()),
-            item.id
+            request = TodoRequestDto(item.toNetworkModel()),
+            todoId = item.id,
+            revision = revision
         )
 
         return response.revision
     }
 
     override suspend fun deleteTodoItem(id: String, revision: Int): Int {
-        val response = todoApi.deleteTodoById(id)
+        val response = todoApi.deleteTodoById(
+            todoId = id,
+            revision = revision
+        )
 
         return response.revision
     }
 
     override suspend fun updateAllTodos(todos: List<TodoItem>, revision: Int): Int {
         val networkTodos = todos.map { it.toNetworkModel() }
-        val response = todoApi.updateTodos(networkTodos)
+        val response = todoApi.updateTodos(
+            request = networkTodos,
+            revision = revision
+        )
 
         return response.revision
     }

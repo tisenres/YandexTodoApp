@@ -9,12 +9,14 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object UseCaseModule {
 
     @Provides
+    @Singleton
     fun provideGetTodoItemUseCase(
         remoteRepository: TodoItemsRemoteRepository,
         localRepository: TodoItemsLocalRepository
@@ -26,6 +28,7 @@ object UseCaseModule {
     }
 
     @Provides
+    @Singleton
     fun provideDeleteTodoItemUseCase(
         remoteRepository: TodoItemsRemoteRepository,
         localRepository: TodoItemsLocalRepository
@@ -37,6 +40,7 @@ object UseCaseModule {
     }
 
     @Provides
+    @Singleton
     fun provideAddTodoItemUseCase(
         remoteRepository: TodoItemsRemoteRepository,
         localRepository: TodoItemsLocalRepository
