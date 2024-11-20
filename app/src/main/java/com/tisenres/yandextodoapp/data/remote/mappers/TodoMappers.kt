@@ -11,9 +11,16 @@ fun TodoDto.toDomainModel(): TodoItem {
     return TodoItem(
         id = id.toString(),
         text = text ?: "",
-        importance = mapColorToImportance(color),
+        importance = when (
+            importance?.lowercase()
+        ) {
+            "important" -> Importance.HIGH
+            "basic" -> Importance.NORMAL
+            "low" -> Importance.LOW
+            else -> Importance.NORMAL
+        },
         isCompleted = done ?: false,
-        deadline = Date(deadline ?: 0),
+        deadline = deadline?.let { Date(it) },
         createdAt = Date(createdAt ?: 0),
         modifiedAt = Date(changedAt ?: 0)
     )

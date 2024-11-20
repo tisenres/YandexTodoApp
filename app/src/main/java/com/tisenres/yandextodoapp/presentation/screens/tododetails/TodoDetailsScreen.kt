@@ -90,7 +90,11 @@ fun TodoDetailsScreen(
                         Text(
                             text = stringResource(R.string.save),
                             style = MaterialTheme.typography.labelSmall,
-                            color = if (text.text.isNotBlank()) LocalExtendedColors.current.blue else LocalExtendedColors.current.disableLabel
+                            color = if (text.text.isNotBlank()) {
+                                LocalExtendedColors.current.blue
+                            } else {
+                                LocalExtendedColors.current.disableLabel
+                            }
                         )
                     }
                 },
@@ -119,7 +123,9 @@ fun TodoDetailsScreen(
                                 .fillMaxWidth()
                                 .height(104.dp)
                                 .padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 12.dp),
-                            textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onBackground),
+                            textStyle = MaterialTheme.typography.bodyLarge.copy(
+                                color = MaterialTheme.colorScheme.onBackground
+                            ),
                             decorationBox = { innerTextField ->
                                 Box {
                                     if (text.text.isEmpty()) {
@@ -209,8 +215,10 @@ fun TodoDetailsScreen(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 12.dp),
-                        horizontalArrangement = Arrangement.Start
+                            .height(66.dp)
+                            .padding(horizontal = 8.dp, vertical = 12.dp),
+                        horizontalArrangement = Arrangement.Start,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         TextButton(
                             onClick = onDeleteClick,
@@ -222,18 +230,17 @@ fun TodoDetailsScreen(
                                 painter = painterResource(R.drawable.delete),
                                 contentDescription = stringResource(R.string.delete),
                                 modifier = Modifier
-                                    .size(24.dp)
-                                    .align(Alignment.CenterVertically),
+                                    .size(24.dp),
                                 tint = LocalExtendedColors.current.red,
                             )
-                            Spacer(modifier = Modifier.width(12.dp))
+                            Spacer(modifier = Modifier.width(10.dp))
                             Text(
                                 text = stringResource(R.string.delete),
                                 style = MaterialTheme.typography.bodyLarge,
-                                color = LocalExtendedColors.current.red,
-                                modifier = Modifier.align(Alignment.CenterVertically)
+                                color = LocalExtendedColors.current.red
                             )
                         }
+
                     }
                 }
             }

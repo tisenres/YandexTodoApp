@@ -7,7 +7,7 @@ import javax.inject.Inject
 private const val CURRENT_REVISION = "current_revision"
 
 class AppPreferences @Inject constructor(
-    private val context: Context
+    context: Context
 ) {
 
     private val preferences: SharedPreferences =
