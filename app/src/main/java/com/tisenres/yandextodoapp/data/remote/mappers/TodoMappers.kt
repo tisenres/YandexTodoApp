@@ -9,11 +9,12 @@ import java.util.UUID
 fun TodoDto.toDomainModel(): TodoItem {
     return TodoItem(
         id = id.toString(),
-        text = text,
+        text = text ?: "",
         importance = mapColorToImportance(color),
-        isCompleted = done,
-        createdAt = Date(createdAt),
-        modifiedAt = Date(changedAt)
+        isCompleted = done ?: false,
+        deadline = Date(deadline ?: 0),
+        createdAt = Date(createdAt ?: 0),
+        modifiedAt = Date(changedAt ?: 0)
     )
 }
 

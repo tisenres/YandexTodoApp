@@ -5,7 +5,7 @@ import android.content.SharedPreferences
 
 private const val CURRENT_REVISION = "current_revision"
 
-class AppPreference(context: Context) {
+class AppPreferences(context: Context) {
 
     private val preferences: SharedPreferences =
         context.getSharedPreferences("settings", Context.MODE_PRIVATE)

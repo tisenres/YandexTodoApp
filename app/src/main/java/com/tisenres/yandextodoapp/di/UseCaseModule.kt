@@ -1,5 +1,6 @@
 package com.tisenres.yandextodoapp.di
 
+import com.tisenres.yandextodoapp.domain.repository.TodoItemsLocalRepository
 import com.tisenres.yandextodoapp.domain.repository.TodoItemsRemoteRepository
 import com.tisenres.yandextodoapp.domain.usecases.CreateTodoUseCase
 import com.tisenres.yandextodoapp.domain.usecases.DeleteTodoUseCase
@@ -14,17 +15,35 @@ import dagger.hilt.components.SingletonComponent
 object UseCaseModule {
 
     @Provides
-    fun provideGetTodoItemUseCase(repository: TodoItemsRemoteRepository): GetTodoItemUseCase {
-        return GetTodoItemUseCase(repository)
+    fun provideGetTodoItemUseCase(
+        remoteRepository: TodoItemsRemoteRepository,
+        localRepository: TodoItemsLocalRepository
+    ): GetTodoItemUseCase {
+        return GetTodoItemUseCase(
+            remoteRepository,
+            localRepository
+        )
     }
 
     @Provides
-    fun provideDeleteTodoItemUseCase(repository: TodoItemsRemoteRepository): DeleteTodoUseCase {
-        return DeleteTodoUseCase(repository)
+    fun provideDeleteTodoItemUseCase(
+        remoteRepository: TodoItemsRemoteRepository,
+        localRepository: TodoItemsLocalRepository
+    ): DeleteTodoUseCase {
+        return DeleteTodoUseCase(
+            remoteRepository,
+            localRepository
+        )
     }
 
     @Provides
-    fun provideAddTodoItemUseCase(repository: TodoItemsRemoteRepository): CreateTodoUseCase {
-        return CreateTodoUseCase(repository)
+    fun provideAddTodoItemUseCase(
+        remoteRepository: TodoItemsRemoteRepository,
+        localRepository: TodoItemsLocalRepository
+    ): CreateTodoUseCase {
+        return CreateTodoUseCase(
+            remoteRepository,
+            localRepository
+        )
     }
 }

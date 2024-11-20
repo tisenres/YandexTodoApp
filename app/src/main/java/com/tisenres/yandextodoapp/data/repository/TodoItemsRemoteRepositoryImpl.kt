@@ -1,6 +1,5 @@
 package com.tisenres.yandextodoapp.data.repository
 
-import com.tisenres.yandextodoapp.data.local.preference.AppPreference
 import com.tisenres.yandextodoapp.data.remote.TodoApiService
 import com.tisenres.yandextodoapp.data.remote.dto.TodoRequestDto
 import com.tisenres.yandextodoapp.data.remote.mappers.toDomainModel
@@ -14,44 +13,60 @@ import javax.inject.Inject
 
 class TodoItemsRemoteRepositoryImpl @Inject constructor(
     private val todoApi: TodoApiService,
-    private val appPreference: AppPreference
 ) : TodoItemsRemoteRepository {
 
-    override suspend fun getAllTodos(): Flow<List<TodoItem>> = flow {
+    override suspend fun getAllTodos(): Pair<Flow<List<TodoItem>>, Int> {
         val response = todoApi.getTodos()
-        appPreference.setCurrentRevision(response.revision)
-        emit(response.todoList.map { it.toDomainModel() })
+
+        val todos = response.todoList?.map { it.toDomainModel() } ?: emptyList()
+        val revision = response.revision
+
+        val todosFlow = flow {
+            emit(todos)
+        }
+
+        return todosFlow to revision
     }
 
-    override suspend fun createTodo(item: TodoItem) {
+    override suspend fun createTodo(item: TodoItem, revision: Int): Int {
         val response = todoApi.createTodo(
             TodoRequestDto(item.toNetworkModel())
         )
-        appPreference.setCurrentRevision(response.revision)
+        return response.revision
     }
 
-    override suspend fun getTodoItemById(id: String) = flow {
+    override suspend fun getTodoItemById(id: String): Pair<Flow<TodoItem?>, Int> {
         val response = todoApi.getTodoById(UUID.fromString(id))
-        appPreference.setCurrentRevision(response.revision)
-        emit(response.element.toDomainModel())
+
+        val todo = response.element?.toDomainModel()
+        val revision = response.revision
+
+        val todoFlow = flow {
+            emit(todo)
+        }
+
+        return todoFlow to revision
     }
 
-    override suspend fun updateTodoItem(item: TodoItem) {
+    override suspend fun updateTodoItem(item: TodoItem, revision: Int): Int {
         val response = todoApi.updateTodoById(
             TodoRequestDto(item.toNetworkModel()),
             item.id
         )
-        appPreference.setCurrentRevision(response.revision)
+
+        return response.revision
     }
 
-    override suspend fun deleteTodoItem(id: String) {
+    override suspend fun deleteTodoItem(id: String, revision: Int): Int {
         val response = todoApi.deleteTodoById(id)
-        appPreference.setCurrentRevision(response.revision)
+
+        return response.revision
     }
 
-    override suspend fun updateAllTodos(todos: List<TodoItem>) {
+    override suspend fun updateAllTodos(todos: List<TodoItem>, revision: Int): Int {
         val networkTodos = todos.map { it.toNetworkModel() }
         val response = todoApi.updateTodos(networkTodos)
-        appPreference.setCurrentRevision(response.revision)
+
+        return response.revision
     }
 }

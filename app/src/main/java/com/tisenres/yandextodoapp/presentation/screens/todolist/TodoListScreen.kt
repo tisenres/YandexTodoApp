@@ -3,6 +3,7 @@ package com.tisenres.yandextodoapp.presentation.screens.todolist
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
+import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -333,6 +334,7 @@ fun TodoList(
                             isCompleted = item.isCompleted,
                             onClick = { text -> onTodoClick(item.id, text) },
                             onCheckedChange = { checked ->
+                                Log.d("TodoList", "onCheckedChange: $checked")
                                 onCompleteTodo(item.id)
                             }
                         )

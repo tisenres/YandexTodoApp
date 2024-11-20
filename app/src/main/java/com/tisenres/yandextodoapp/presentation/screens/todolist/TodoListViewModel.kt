@@ -82,6 +82,7 @@ class TodoListViewModel @Inject constructor(
                     break
                 } catch (e: BadRequestException) {
                     _errorMessage.value = "Bad Request: ${e.message}"
+                    retryCount++
                 } catch (e: Exception) {
                     retryCount++
                     Log.e("TodoListViewModel", "Error fetching todos, retry $retryCount", e)
@@ -100,6 +101,7 @@ class TodoListViewModel @Inject constructor(
 
     fun completeTodo(todoId: String) {
         viewModelScope.launch {
+            Log.d("TodoListViewModel", "completeTodo: $todoId")
             try {
                 _todos.value.find { it.id == todoId }?.let { todo ->
                     val updatedTodo = todo.copy(isCompleted = !todo.isCompleted)

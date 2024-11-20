@@ -12,8 +12,8 @@ class ErrorHandlingInterceptor : Interceptor {
             response.close()
             when (response.code) {
 
-                400 -> throw BadRequestException(errorBody ?: "Bad Request")
-                401 -> throw UnauthorizedException(errorBody ?: "Unauthorized")
+                400 -> throw BadRequestException(errorBody)
+                401 -> throw UnauthorizedException(errorBody)
                 403 -> throw Exception("Forbidden")
                 404 -> throw Exception("Not Found")
                 500 -> throw Exception("Internal Server Error")

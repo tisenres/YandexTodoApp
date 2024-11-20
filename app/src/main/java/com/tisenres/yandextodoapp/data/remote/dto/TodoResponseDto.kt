@@ -4,9 +4,9 @@ import com.google.gson.annotations.SerializedName
 
 data class TodoResponseDto(
     @SerializedName("status")
-    val status: String,
+    val status: String?,
     @SerializedName("element")
-    val element: TodoDto,
+    val element: TodoDto?,
     @SerializedName("revision")
     val revision: Int,
 )
