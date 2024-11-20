@@ -19,6 +19,11 @@ interface TodoApiService {
     @GET("list")
     suspend fun getTodos(): TodoListDto
 
+    @GET("list/{id}")
+    suspend fun getTodoById(
+        @Path("id") todoId: UUID
+    ): TodoResponseDto
+
     @POST("list")
     suspend fun createTodo(
         @Body request: TodoRequestDto,
@@ -30,11 +35,6 @@ interface TodoApiService {
         @Body request: List<TodoDto>,
         @Header("X-Last-Known-Revision") revision: Int
     ): TodoListDto
-
-    @GET("list/{id}")
-    suspend fun getTodoById(
-        @Path("id") todoId: UUID
-    ): TodoResponseDto
 
     @PUT("list/{id}")
     suspend fun updateTodoById(

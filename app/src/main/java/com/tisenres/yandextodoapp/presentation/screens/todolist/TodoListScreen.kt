@@ -39,7 +39,7 @@ import java.util.Date
 @Composable
 fun TodoListScreen(
     viewModel: TodoListViewModel = hiltViewModel(),
-    onTodoClick: (String) -> Unit,
+    onTodoItemClick: (String) -> Unit,
     onCreateTodoClick: () -> Unit
 ) {
     val todos by viewModel.todos.collectAsState()
@@ -48,7 +48,6 @@ fun TodoListScreen(
     val isError by viewModel.isError.collectAsState()
 
     val onShowCompletedTasks by viewModel.onShowCompletedTasks.collectAsState()
-//    val isConnected by viewModel.isConnected.collectAsState()
 
     val snackbarHostState = remember { SnackbarHostState() }
     rememberCoroutineScope()
@@ -70,7 +69,7 @@ fun TodoListScreen(
 
     TodoListContent(
         todos = todos,
-        onTodoClick = onTodoClick,
+        onTodoItemClick = onTodoItemClick,
         onCreateTodoClick = onCreateTodoClick,
         onCompleteTodo = { todoId -> viewModel.completeTodo(todoId) },
         onDeleteTodo = { todoId -> viewModel.deleteTodo(todoId) },
@@ -87,7 +86,7 @@ fun TodoListScreen(
 @Composable
 fun TodoListContent(
     todos: List<TodoItem>,
-    onTodoClick: (String) -> Unit,
+    onTodoItemClick: (String) -> Unit,
     onCreateTodoClick: () -> Unit,
     onCompleteTodo: (String) -> Unit,
     onDeleteTodo: (String) -> Unit,
@@ -176,7 +175,7 @@ fun TodoListContent(
 
                     TodoList(
                         todos = filteredTodos,
-                        onTodoClick = onTodoClick,
+                        onTodoItemClick = onTodoItemClick,
                         onCompleteTodo = onCompleteTodo,
                         onCreateTodoClick = onCreateTodoClick,
                         onDeleteTodo = onDeleteTodo,
@@ -205,7 +204,7 @@ fun HeaderAndCompletedTodos(
             .padding(start = 60.dp, top = 50.dp, end = 24.dp)
     ) {
         Text(
-            text = "Мои дела",
+            text = stringResource(R.string.my_todos),
             style = MaterialTheme.typography.titleLarge,
             color = LocalExtendedColors.current.primaryLabel
         )
@@ -217,7 +216,7 @@ fun HeaderAndCompletedTodos(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "Выполнено — $completedTodos",
+                text = stringResource(R.string.completed) +" — $completedTodos",
                 style = MaterialTheme.typography.bodySmall,
                 color = LocalExtendedColors.current.tertiaryLabel,
             )
@@ -242,7 +241,7 @@ fun HeaderAndCompletedTodos(
 @Composable
 fun TodoList(
     todos: List<TodoItem>,
-    onTodoClick: (String) -> Unit,
+    onTodoItemClick: (String) -> Unit,
     onCompleteTodo: (String) -> Unit,
     onCreateTodoClick: () -> Unit,
     onDeleteTodo: (String) -> Unit,
@@ -261,7 +260,7 @@ fun TodoList(
             PullToRefreshDefaults.Indicator(
                 state = pullRefreshState,
                 isRefreshing = isLoading,
-                color = Color(0xFF32B768),
+                color = LocalExtendedColors.current.green,
                 containerColor = Color.White,
                 modifier = Modifier.align(Alignment.TopCenter)
             )
@@ -329,8 +328,8 @@ fun TodoList(
                             text = item.text,
                             importance = item.importance,
                             isCompleted = item.isCompleted,
-                            onItemClick = { text -> onTodoClick(item.id) },
-                            onCheckedChange = { checked ->
+                            onItemClick = { onTodoItemClick(item.id) },
+                            onCheckedChange = {
                                 onCompleteTodo(item.id)
                             },
                         )
@@ -375,66 +374,13 @@ fun newTaskRow(onCreateTodoClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = "Новое",
+            text = stringResource(R.string.new_todo),
             style = MaterialTheme.typography.bodyLarge,
             color = LocalExtendedColors.current.tertiaryLabel,
             maxLines = 3,
             overflow = TextOverflow.Ellipsis,
         )
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun HeaderAndCompletedTodosPreview() {
-    HeaderAndCompletedTodos(
-        completedTodos = 5,
-        onEyeClick = {}
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun NewTaskRowPreview() {
-    newTaskRow(onCreateTodoClick = {})
-}
-
-@Preview(showBackground = true)
-@Composable
-fun TodoListPreview() {
-    val sampleTodos = listOf(
-        TodoItem(
-            id = "1",
-            text = "Задача 1",
-            importance = Importance.NORMAL,
-            isCompleted = false,
-            createdAt = Date()
-        ),
-        TodoItem(
-            id = "2",
-            text = "Задача 2",
-            importance = Importance.HIGH,
-            isCompleted = true,
-            createdAt = Date()
-        ),
-        TodoItem(
-            id = "3",
-            text = "Задача 3",
-            importance = Importance.LOW,
-            isCompleted = false,
-            createdAt = Date()
-        )
-    )
-    TodoList(
-        todos = sampleTodos,
-        onTodoClick = { _ -> },
-        onCompleteTodo = {},
-        onCreateTodoClick = {},
-        onDeleteTodo = {},
-        modifier = Modifier,
-        isLoading = false,
-        viewModel = hiltViewModel()
-    )
 }
 
 @Composable
@@ -453,41 +399,4 @@ fun ObserveNetworkConnectivity(
         connectivityManager.registerDefaultNetworkCallback(networkCallback)
         onDispose { connectivityManager.unregisterNetworkCallback(networkCallback) }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun TodoListContentPreview() {
-    val sampleTodos = listOf(
-        TodoItem(
-            id = "1",
-            text = "Задача 1",
-            importance = Importance.NORMAL,
-            isCompleted = false,
-            createdAt = Date()
-        ),
-        TodoItem(
-            id = "2",
-            text = "Задача 2",
-            importance = Importance.HIGH,
-            isCompleted = true,
-            createdAt = Date()
-        ),
-        TodoItem(
-            id = "3",
-            text = "Задача 3",
-            importance = Importance.LOW,
-            isCompleted = false,
-            createdAt = Date()
-        )
-    )
-//    TodoListContent(
-//        todos = sampleTodos,
-//        onTodoClick = { _, _ -> },
-//        onCreateTodoClick = {},
-//        onCompleteTodo = {},
-//        onDeleteTodo = {},
-//        isLoading = true,
-//        viewModel = hiltViewModel()
-//    )
 }

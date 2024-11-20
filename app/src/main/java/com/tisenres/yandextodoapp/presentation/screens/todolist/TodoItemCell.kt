@@ -76,6 +76,7 @@ fun TodoItemCell(
                         modifier = Modifier.padding(end = 7.dp)
                     )
                 }
+
                 Importance.LOW -> {
                     Icon(
                         painter = painterResource(R.drawable.priority_low),
@@ -84,6 +85,7 @@ fun TodoItemCell(
                         modifier = Modifier.padding(end = 7.dp)
                     )
                 }
+
                 else -> {}
             }
 
@@ -93,7 +95,8 @@ fun TodoItemCell(
                 color = textColor,
                 textDecoration = textDecoration,
                 maxLines = 3,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(end = 7.dp)
             )
         }
 

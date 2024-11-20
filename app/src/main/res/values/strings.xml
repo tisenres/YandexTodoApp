@@ -3,6 +3,9 @@
     <string name="close">Закрыть</string>
     <string name="save">Сохранить</string>
     <string name="what_to_do">Сделать что-то...</string>
+    <string name="my_todos">Мои дела</string>
+    <string name="completed">Выполнено</string>
+    <string name="new_todo">Новое</string>
     <string name="error_empty_field">Поле не может быть пустым</string>
     <string name="importance">Важность</string>
     <string name="do_until">Сделать до</string>

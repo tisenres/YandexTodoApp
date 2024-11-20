@@ -85,8 +85,8 @@ class TodoDetailsViewModel @Inject constructor(
         }
     }
 
-    fun updateTodo(todoId: String, text: String, importance: Importance, deadline: Date?) {
-        viewModelScope.launch {
+    fun updateTodoAsync(todoId: String, text: String, importance: Importance, deadline: Date?): Deferred<Unit> {
+        return viewModelScope.async {
             _isLoading.value = true
             try {
                 withContext(Dispatchers.IO) {
@@ -112,8 +112,8 @@ class TodoDetailsViewModel @Inject constructor(
         }
     }
 
-    fun deleteTodo(todoId: String) {
-        viewModelScope.launch {
+    fun deleteTodoAsync(todoId: String): Deferred<Unit> {
+        return viewModelScope.async {
             _isLoading.value = true
             try {
                 withContext(Dispatchers.IO) {
