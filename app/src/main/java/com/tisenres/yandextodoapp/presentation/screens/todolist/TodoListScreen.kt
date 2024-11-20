@@ -345,6 +345,7 @@ fun TodoList(
                     SwipeToDismissBoxValue.EndToStart -> {
                         LaunchedEffect(Unit) {
                             onDeleteTodo(item.id)
+                            swipeState.snapTo(SwipeToDismissBoxValue.Settled)
                         }
                     }
 

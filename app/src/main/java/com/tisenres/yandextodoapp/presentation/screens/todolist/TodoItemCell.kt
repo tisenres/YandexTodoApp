@@ -33,7 +33,11 @@ fun TodoItemCell(
         importance == Importance.HIGH -> LocalExtendedColors.current.red
         else -> LocalExtendedColors.current.supportSeparator
     }
-    val textColor = if (isCompleted) LocalExtendedColors.current.tertiaryLabel else LocalExtendedColors.current.primaryLabel
+    val textColor = if (isCompleted) {
+        LocalExtendedColors.current.tertiaryLabel
+    } else {
+        LocalExtendedColors.current.primaryLabel
+    }
     val textDecoration = if (isCompleted) TextDecoration.LineThrough else null
 
     Row(
