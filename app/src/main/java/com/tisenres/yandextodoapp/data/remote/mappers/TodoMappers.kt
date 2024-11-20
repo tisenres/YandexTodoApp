@@ -43,12 +43,3 @@ fun TodoItem.toNetworkModel(): TodoDto {
         lastUpdatedBy = Build.MODEL
     )
 }
-
-private fun mapColorToImportance(color: String?): Importance {
-    return when (color?.lowercase()) {
-        "red" -> Importance.HIGH
-        "yellow" -> Importance.NORMAL
-        "green" -> Importance.LOW
-        else -> Importance.NORMAL
-    }
-}

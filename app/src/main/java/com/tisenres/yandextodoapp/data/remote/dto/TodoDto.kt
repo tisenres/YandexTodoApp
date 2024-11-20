@@ -21,5 +21,5 @@ data class TodoDto(
     @SerializedName("changed_at")
     val changedAt: Long?,
     @SerializedName("last_updated_by")
-    val lastUpdatedBy: String?,
+    val lastUpdatedBy: String?
 )

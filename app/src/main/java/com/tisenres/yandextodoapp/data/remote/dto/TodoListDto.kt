@@ -8,5 +8,5 @@ data class TodoListDto(
     @SerializedName("list")
     val todoList: List<TodoDto>?,
     @SerializedName("revision")
-    val revision: Int,
+    val revision: Int
 )

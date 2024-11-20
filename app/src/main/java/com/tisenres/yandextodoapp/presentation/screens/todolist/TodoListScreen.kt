@@ -1,8 +1,5 @@
 package com.tisenres.yandextodoapp.presentation.screens.todolist
 
-import android.content.Context
-import android.net.ConnectivityManager
-import android.net.Network
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,18 +20,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.tisenres.yandextodoapp.R
-import com.tisenres.yandextodoapp.domain.entity.Importance
 import com.tisenres.yandextodoapp.domain.entity.TodoItem
 import com.tisenres.yandextodoapp.presentation.theme.LocalExtendedColors
-import java.util.Date
 
 @Composable
 fun TodoListScreen(
@@ -53,19 +46,11 @@ fun TodoListScreen(
     rememberCoroutineScope()
 
     LaunchedEffect(errorMessage) {
-        errorMessage?.let {
-            snackbarHostState.showSnackbar(message = it, duration = SnackbarDuration.Short)
+        errorMessage?.let { message ->
+            snackbarHostState.showSnackbar(message = message, duration = SnackbarDuration.Short)
             viewModel.clearErrorMessage()
         }
     }
-
-    ObserveNetworkConnectivity(
-        onAvailable = {
-            viewModel.setNetworkAvailable(true)
-            viewModel.refreshTodosWithRetry()
-        },
-        onLost = { viewModel.setNetworkAvailable(false) }
-    )
 
     TodoListContent(
         todos = todos,
@@ -216,15 +201,15 @@ fun HeaderAndCompletedTodos(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = stringResource(R.string.completed) +" — $completedTodos",
+                text = stringResource(R.string.completed) + " — $completedTodos",
                 style = MaterialTheme.typography.bodySmall,
                 color = LocalExtendedColors.current.tertiaryLabel,
             )
             Spacer(modifier = Modifier.weight(1f))
             Icon(
-                painter = painterResource(if (isVisible) R.drawable.visibility else R.drawable.visibility_off),
+                painter = painterResource(if (!isVisible) R.drawable.visibility else R.drawable.visibility_off),
                 tint = LocalExtendedColors.current.blue,
-                contentDescription = if (isVisible) "Hide Completed Todos" else "Show Completed Todos",
+                contentDescription = if (!isVisible) "Hide Completed Todos" else "Show Completed Todos",
                 modifier = Modifier
                     .size(24.dp)
                     .clip(CircleShape)
@@ -254,7 +239,9 @@ fun TodoList(
 
     PullToRefreshBox(
         state = pullRefreshState,
-        onRefresh = { viewModel.refreshTodosWithRetry() },
+        onRefresh = {
+            if (!isLoading) viewModel.refreshTodosWithRetry()
+        },
         isRefreshing = isLoading,
         indicator = {
             PullToRefreshDefaults.Indicator(
@@ -266,7 +253,6 @@ fun TodoList(
             )
         }
     ) {
-
         LazyColumn(
             contentPadding = PaddingValues(vertical = 8.dp),
             modifier = modifier
@@ -380,23 +366,5 @@ fun newTaskRow(onCreateTodoClick: () -> Unit) {
             maxLines = 3,
             overflow = TextOverflow.Ellipsis,
         )
-    }
-}
-
-@Composable
-fun ObserveNetworkConnectivity(
-    onAvailable: () -> Unit,
-    onLost: () -> Unit
-) {
-    val context = LocalContext.current
-    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-    DisposableEffect(Unit) {
-        val networkCallback = object : ConnectivityManager.NetworkCallback() {
-            override fun onAvailable(network: Network) = onAvailable()
-            override fun onLost(network: Network) = onLost()
-        }
-        connectivityManager.registerDefaultNetworkCallback(networkCallback)
-        onDispose { connectivityManager.unregisterNetworkCallback(networkCallback) }
     }
 }

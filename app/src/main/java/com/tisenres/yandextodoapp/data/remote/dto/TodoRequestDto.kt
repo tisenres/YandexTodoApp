@@ -4,5 +4,5 @@ import com.google.gson.annotations.SerializedName
 
 data class TodoRequestDto(
     @SerializedName("element")
-    val element: TodoDto,
+    val element: TodoDto
 )

@@ -52,7 +52,6 @@ class TodoDetailsViewModel @Inject constructor(
             } catch (e: BadRequestException) {
                 _errorMessage.value = "Bad Request: ${e.message}"
             } catch (e: Exception) {
-                Log.e("TodoDetailsViewModel", "Error fetching todo by id", e)
                 _errorMessage.value = "Something went wrong"
             } finally {
                 _isLoading.value = false
@@ -78,7 +77,6 @@ class TodoDetailsViewModel @Inject constructor(
             } catch (e: BadRequestException) {
                 _errorMessage.value = "Bad Request: ${e.message}"
             } catch (e: Exception) {
-                Log.e("TodoDetailsViewModel", "Error creating todo", e)
                 _errorMessage.value = "Something went wrong"
             } finally {
                 _isLoading.value = false
@@ -105,7 +103,6 @@ class TodoDetailsViewModel @Inject constructor(
             } catch (e: BadRequestException) {
                 _errorMessage.value = "Bad Request: ${e.message}"
             } catch (e: Exception) {
-                Log.e("TodoDetailsViewModel", "Error updating todo", e)
                 _errorMessage.value = "Something went wrong"
             } finally {
                 _isLoading.value = false
@@ -123,7 +120,6 @@ class TodoDetailsViewModel @Inject constructor(
             } catch (e: BadRequestException) {
                 _errorMessage.value = "Bad Request: ${e.message}"
             } catch (e: Exception) {
-                Log.e("TodoDetailsViewModel", "Error deleting todo", e)
                 _errorMessage.value = "Something went wrong"
             } finally {
                 _isLoading.value = false
