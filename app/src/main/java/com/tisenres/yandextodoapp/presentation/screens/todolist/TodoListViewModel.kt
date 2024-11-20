@@ -7,7 +7,6 @@ import com.tisenres.yandextodoapp.data.remote.interceptors.BadRequestException
 import com.tisenres.yandextodoapp.domain.entity.TodoItem
 import com.tisenres.yandextodoapp.domain.usecases.DeleteTodoUseCase
 import com.tisenres.yandextodoapp.domain.usecases.GetTodosUseCase
-import com.tisenres.yandextodoapp.domain.usecases.UpdateAllTodosUseCase
 import com.tisenres.yandextodoapp.domain.usecases.UpdateTodoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -103,14 +102,17 @@ class TodoListViewModel @Inject constructor(
         viewModelScope.launch {
             Log.d("TodoListViewModel", "completeTodo: $todoId")
             try {
-                _todos.value.find { it.id == todoId }?.let { todo ->
+                val todo = _todos.value.find { it.id == todoId }
+
+                if (todo != null) {
                     val updatedTodo = todo.copy(isCompleted = !todo.isCompleted)
-                    _todos.value = _todos.value.map {
-                        if (it.id == todoId) updatedTodo else it
-                    }
 
                     withContext(Dispatchers.IO) {
                         updateTodoUseCase(updatedTodo)
+                    }
+
+                    _todos.value = _todos.value.map {
+                        if (it.id == todoId) updatedTodo else it
                     }
                 }
             } catch (e: BadRequestException) {
@@ -125,11 +127,11 @@ class TodoListViewModel @Inject constructor(
     fun deleteTodo(todoId: String) {
         viewModelScope.launch {
             try {
-                _todos.value = _todos.value.filterNot { it.id == todoId }
-
                 withContext(Dispatchers.IO) {
                     deleteTodoUseCase(todoId)
                 }
+
+                _todos.value = _todos.value.filterNot { it.id == todoId }
             } catch (e: BadRequestException) {
                 _errorMessage.value = "Bad Request: ${e.message}"
             } catch (e: Exception) {
