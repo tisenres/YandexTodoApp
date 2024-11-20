@@ -11,7 +11,9 @@ import com.tisenres.yandextodoapp.domain.usecases.DeleteTodoUseCase
 import com.tisenres.yandextodoapp.domain.usecases.GetTodoItemUseCase
 import com.tisenres.yandextodoapp.domain.usecases.UpdateTodoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -57,23 +59,21 @@ class TodoDetailsViewModel @Inject constructor(
         }
     }
 
-    fun createTodo(text: String, importance: Importance, deadline: Date?) {
-        viewModelScope.launch {
+    fun createTodoAsync(text: String, importance: Importance, deadline: Date?): Deferred<Unit> {
+        return viewModelScope.async {
             _isLoading.value = true
             try {
-                withContext(Dispatchers.IO) {
-                    createTodoUseCase(
-                        TodoItem(
-                            id = UUID.randomUUID().toString(),
-                            text = text,
-                            importance = importance,
-                            deadline = deadline,
-                            isCompleted = false,
-                            createdAt = Date(),
-                            modifiedAt = null
-                        )
+                createTodoUseCase(
+                    TodoItem(
+                        id = UUID.randomUUID().toString(),
+                        text = text,
+                        importance = importance,
+                        deadline = deadline,
+                        isCompleted = false,
+                        createdAt = Date(),
+                        modifiedAt = null
                     )
-                }
+                )
             } catch (e: BadRequestException) {
                 _errorMessage.value = "Bad Request: ${e.message}"
             } catch (e: Exception) {

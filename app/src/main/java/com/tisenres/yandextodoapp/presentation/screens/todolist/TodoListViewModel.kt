@@ -26,6 +26,12 @@ class TodoListViewModel @Inject constructor(
     private val deleteTodoUseCase: DeleteTodoUseCase
 ) : ViewModel() {
 
+    private val _onShowCompletedTasks = MutableStateFlow(false)
+    val onShowCompletedTasks: StateFlow<Boolean> = _onShowCompletedTasks.asStateFlow()
+
+    private val _isConnected = MutableStateFlow(false)
+    val isConnected: StateFlow<Boolean> = _isConnected.asStateFlow()
+
     private val _todos: MutableStateFlow<List<TodoItem>> = MutableStateFlow(emptyList())
     val todos: StateFlow<List<TodoItem>> = _todos.asStateFlow()
 
@@ -145,8 +151,16 @@ class TodoListViewModel @Inject constructor(
         _errorMessage.value = null
     }
 
+    fun setNetworkAvailable(isAvailable: Boolean) {
+        _isConnected.value = isAvailable
+    }
+
     override fun onCleared() {
         super.onCleared()
         viewModelScope.cancel()
+    }
+
+    fun toggleEyeButton() {
+        _onShowCompletedTasks.value = !_onShowCompletedTasks.value
     }
 }

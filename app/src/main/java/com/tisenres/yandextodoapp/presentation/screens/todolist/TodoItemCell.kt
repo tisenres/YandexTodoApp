@@ -26,7 +26,7 @@ fun TodoItemCell(
     importance: Importance,
     isCompleted: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    onClick: (String) -> Unit
+    onItemClick: (String) -> Unit,
 ) {
     val checkboxColor = when {
         isCompleted -> LocalExtendedColors.current.green
@@ -43,14 +43,16 @@ fun TodoItemCell(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = { onClick(text) })
+            .clickable(onClick = { onItemClick(text) })
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .animateContentSize(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Checkbox(
             checked = isCompleted,
-            onCheckedChange = onCheckedChange,
+            onCheckedChange = { checked ->
+                onCheckedChange(checked)
+            },
             modifier = Modifier
                 .padding(end = 12.dp),
             colors = CheckboxDefaults.colors(

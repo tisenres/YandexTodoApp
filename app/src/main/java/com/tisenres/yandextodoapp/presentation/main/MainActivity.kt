@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
@@ -13,6 +14,7 @@ import com.tisenres.yandextodoapp.presentation.screens.tododetails.TodoDetailsSc
 import com.tisenres.yandextodoapp.presentation.screens.tododetails.TodoDetailsViewModel
 import com.tisenres.yandextodoapp.presentation.theme.YandexTodoAppTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -27,8 +29,8 @@ class MainActivity : ComponentActivity() {
                 NavHost(navController = navController, startDestination = "todoList") {
                     composable("todoList") {
                         TodoListScreen(
-                            onTodoClick = { todoId, todoText ->
-                                navController.navigate("todoDetails/$todoId/$todoText")
+                            onTodoClick = { todoId ->
+                                navController.navigate("todoDetails/$todoId")
                             },
                             onCreateTodoClick = {
                                 navController.navigate("createTodo")
@@ -39,13 +41,10 @@ class MainActivity : ComponentActivity() {
                         "todoDetails/{todoId}/{todoText}",
                         arguments = listOf(
                             navArgument("todoId") { type = NavType.StringType },
-                            navArgument("todoText") { type = NavType.StringType }
                         )
                     ) { backStackEntry ->
                         val todoId =
                             backStackEntry.arguments?.getString("todoId") ?: return@composable
-                        val todoText =
-                            backStackEntry.arguments?.getString("todoText") ?: return@composable
                         val viewModel = hiltViewModel<TodoDetailsViewModel>()
 
                         TodoDetailsScreen(
@@ -73,8 +72,10 @@ class MainActivity : ComponentActivity() {
                             todoId = "",
                             isEditing = false,
                             onSaveClick = { text, importance, deadline ->
-                                viewModel.createTodo(text, importance, deadline)
-                                navController.popBackStack()
+                                lifecycleScope.launch {
+                                    viewModel.createTodoAsync(text, importance, deadline).await()
+                                    navController.popBackStack()
+                                }
                             },
                             onDeleteClick = {
                                 navController.popBackStack()

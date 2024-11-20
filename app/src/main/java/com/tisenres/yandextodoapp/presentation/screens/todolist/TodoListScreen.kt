@@ -3,7 +3,6 @@ package com.tisenres.yandextodoapp.presentation.screens.todolist
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
-import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -40,7 +39,7 @@ import java.util.Date
 @Composable
 fun TodoListScreen(
     viewModel: TodoListViewModel = hiltViewModel(),
-    onTodoClick: (String, String) -> Unit,
+    onTodoClick: (String) -> Unit,
     onCreateTodoClick: () -> Unit
 ) {
     val todos by viewModel.todos.collectAsState()
@@ -48,39 +47,26 @@ fun TodoListScreen(
     val errorMessage by viewModel.errorMessage.collectAsState()
     val isError by viewModel.isError.collectAsState()
 
+    val onShowCompletedTasks by viewModel.onShowCompletedTasks.collectAsState()
+//    val isConnected by viewModel.isConnected.collectAsState()
+
     val snackbarHostState = remember { SnackbarHostState() }
     rememberCoroutineScope()
 
     LaunchedEffect(errorMessage) {
         errorMessage?.let {
-            snackbarHostState.showSnackbar(
-                message = it,
-                duration = SnackbarDuration.Short
-            )
+            snackbarHostState.showSnackbar(message = it, duration = SnackbarDuration.Short)
             viewModel.clearErrorMessage()
         }
     }
 
-    val context = LocalContext.current
-    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-    val isConnected = remember { mutableStateOf(true) }
-
-    DisposableEffect(Unit) {
-        val networkCallback = object : ConnectivityManager.NetworkCallback() {
-            override fun onAvailable(network: Network) {
-                isConnected.value = true
-                viewModel.refreshTodosWithRetry()
-            }
-
-            override fun onLost(network: Network) {
-                isConnected.value = false
-            }
-        }
-        connectivityManager.registerDefaultNetworkCallback(networkCallback)
-        onDispose {
-            connectivityManager.unregisterNetworkCallback(networkCallback)
-        }
-    }
+    ObserveNetworkConnectivity(
+        onAvailable = {
+            viewModel.setNetworkAvailable(true)
+            viewModel.refreshTodosWithRetry()
+        },
+        onLost = { viewModel.setNetworkAvailable(false) }
+    )
 
     TodoListContent(
         todos = todos,
@@ -93,6 +79,7 @@ fun TodoListScreen(
         onRetryClick = { viewModel.refreshTodosWithRetry() },
         snackbarHostState = snackbarHostState,
         modifier = Modifier.fillMaxSize(),
+        onShowCompletedTasks = onShowCompletedTasks,
         viewModel = viewModel
     )
 }
@@ -100,10 +87,11 @@ fun TodoListScreen(
 @Composable
 fun TodoListContent(
     todos: List<TodoItem>,
-    onTodoClick: (String, String) -> Unit,
+    onTodoClick: (String) -> Unit,
     onCreateTodoClick: () -> Unit,
     onCompleteTodo: (String) -> Unit,
     onDeleteTodo: (String) -> Unit,
+    onShowCompletedTasks: Boolean,
     isLoading: Boolean,
     isError: Boolean,
     onRetryClick: () -> Unit,
@@ -111,6 +99,15 @@ fun TodoListContent(
     modifier: Modifier = Modifier,
     viewModel: TodoListViewModel
 ) {
+
+    val filteredTodos = remember(onShowCompletedTasks, todos) {
+        if (onShowCompletedTasks) {
+            todos
+        } else {
+            todos.filter { !it.isCompleted }
+        }
+    }
+
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
@@ -172,13 +169,13 @@ fun TodoListContent(
                 ) {
                     HeaderAndCompletedTodos(
                         completedTodos = todos.count { it.isCompleted },
-                        onEyeClick = {}
+                        onEyeClick = { viewModel.toggleEyeButton() }
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
                     TodoList(
-                        todos = todos,
+                        todos = filteredTodos,
                         onTodoClick = onTodoClick,
                         onCompleteTodo = onCompleteTodo,
                         onCreateTodoClick = onCreateTodoClick,
@@ -245,7 +242,7 @@ fun HeaderAndCompletedTodos(
 @Composable
 fun TodoList(
     todos: List<TodoItem>,
-    onTodoClick: (String, String) -> Unit,
+    onTodoClick: (String) -> Unit,
     onCompleteTodo: (String) -> Unit,
     onCreateTodoClick: () -> Unit,
     onDeleteTodo: (String) -> Unit,
@@ -332,11 +329,10 @@ fun TodoList(
                             text = item.text,
                             importance = item.importance,
                             isCompleted = item.isCompleted,
-                            onClick = { text -> onTodoClick(item.id, text) },
+                            onItemClick = { text -> onTodoClick(item.id) },
                             onCheckedChange = { checked ->
-                                Log.d("TodoList", "onCheckedChange: $checked")
                                 onCompleteTodo(item.id)
-                            }
+                            },
                         )
                     }
                 )
@@ -431,7 +427,7 @@ fun TodoListPreview() {
     )
     TodoList(
         todos = sampleTodos,
-        onTodoClick = { _, _ -> },
+        onTodoClick = { _ -> },
         onCompleteTodo = {},
         onCreateTodoClick = {},
         onDeleteTodo = {},
@@ -439,6 +435,24 @@ fun TodoListPreview() {
         isLoading = false,
         viewModel = hiltViewModel()
     )
+}
+
+@Composable
+fun ObserveNetworkConnectivity(
+    onAvailable: () -> Unit,
+    onLost: () -> Unit
+) {
+    val context = LocalContext.current
+    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+    DisposableEffect(Unit) {
+        val networkCallback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) = onAvailable()
+            override fun onLost(network: Network) = onLost()
+        }
+        connectivityManager.registerDefaultNetworkCallback(networkCallback)
+        onDispose { connectivityManager.unregisterNetworkCallback(networkCallback) }
+    }
 }
 
 @Preview(showBackground = true)
