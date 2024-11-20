@@ -53,7 +53,8 @@ class TodoDetailsViewModel @Inject constructor(
                 _errorMessage.value = "Bad Request: ${e.message}"
             } catch (e: Exception) {
                 _errorMessage.value = "Something went wrong"
-            } finally {
+            }
+            finally {
                 _isLoading.value = false
             }
         }
@@ -78,8 +79,6 @@ class TodoDetailsViewModel @Inject constructor(
                 _errorMessage.value = "Bad Request: ${e.message}"
             } catch (e: Exception) {
                 _errorMessage.value = "Something went wrong"
-            } finally {
-                _isLoading.value = false
             }
         }
     }
@@ -104,8 +103,6 @@ class TodoDetailsViewModel @Inject constructor(
                 _errorMessage.value = "Bad Request: ${e.message}"
             } catch (e: Exception) {
                 _errorMessage.value = "Something went wrong"
-            } finally {
-                _isLoading.value = false
             }
         }
     }
@@ -121,8 +118,6 @@ class TodoDetailsViewModel @Inject constructor(
                 _errorMessage.value = "Bad Request: ${e.message}"
             } catch (e: Exception) {
                 _errorMessage.value = "Something went wrong"
-            } finally {
-                _isLoading.value = false
             }
         }
     }
