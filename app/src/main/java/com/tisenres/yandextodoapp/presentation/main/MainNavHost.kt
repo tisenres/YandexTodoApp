@@ -1,7 +1,8 @@
 package com.tisenres.yandextodoapp.presentation.main
+
 import androidx.compose.runtime.Composable
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
@@ -12,6 +13,7 @@ import androidx.navigation.navArgument
 import com.tisenres.yandextodoapp.presentation.screens.todolist.TodoListScreen
 import com.tisenres.yandextodoapp.presentation.screens.tododetails.TodoDetailsScreen
 import com.tisenres.yandextodoapp.presentation.screens.tododetails.TodoDetailsViewModel
+import com.tisenres.yandextodoapp.presentation.screens.todolist.TodoListViewModel
 import kotlinx.coroutines.launch
 
 @Composable
@@ -19,12 +21,19 @@ fun MainNavHost(
     navController: NavHostController,
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current
 ) {
+
+    val viewModelFactory = LocalViewModelFactory.current
+
     NavHost(
         navController = navController,
         startDestination = "todoList"
     ) {
         composable(Screen.TodoList.route) {
+
+            val todoListViewModel = viewModelFactory.create(TodoListViewModel::class.java)
+
             TodoListScreen(
+                viewModel = todoListViewModel,
                 onTodoItemClick = { todoId ->
                     navController.navigate("todoDetails/$todoId")
                 },
@@ -39,14 +48,18 @@ fun MainNavHost(
             arguments = listOf(navArgument("todoId") { type = NavType.StringType })
         ) { backStackEntry ->
             val todoId = backStackEntry.arguments?.getString("todoId") ?: return@composable
-            val viewModel = hiltViewModel<TodoDetailsViewModel>()
+
+            val viewModel = ViewModelProvider(
+                backStackEntry,
+                viewModelFactory
+            ).get(TodoDetailsViewModel::class.java)
 
             TodoDetailsScreen(
                 todoId = todoId,
                 isEditing = true,
                 onSaveClick = { text, importance, deadline ->
                     lifecycleOwner.lifecycleScope.launch {
-                        viewModel.updateTodoAsync(todoId, text, importance, deadline).await()
+                        viewModel.updateTodoAsync(todoId, text, importance, deadline)
                         navController.popBackStack()
                     }
                 },
@@ -63,8 +76,13 @@ fun MainNavHost(
             )
         }
 
-        composable(Screen.CreateTodo.route) {
-            val viewModel = hiltViewModel<TodoDetailsViewModel>()
+        composable(Screen.CreateTodo.route) { backStackEntry ->
+
+            val viewModelStoreOwner = backStackEntry
+            val viewModel = ViewModelProvider(
+                viewModelStoreOwner,
+                viewModelFactory
+            ).get(TodoDetailsViewModel::class.java)
 
             TodoDetailsScreen(
                 todoId = "",

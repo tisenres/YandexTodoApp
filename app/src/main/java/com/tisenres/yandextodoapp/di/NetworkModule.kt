@@ -10,13 +10,10 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import dagger.Module
 import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 @Module
-@InstallIn(SingletonComponent::class)
-object NetworkModule {
+class NetworkModule {
 
     @Provides
     @Singleton
@@ -28,11 +25,8 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideHeaderInterceptor(
-    ): HeaderInterceptor {
-        return HeaderInterceptor(
-            tokenProvider = { BuildConfig.TOKEN }
-        )
+    fun provideHeaderInterceptor(): HeaderInterceptor {
+        return HeaderInterceptor { BuildConfig.TOKEN }
     }
 
     @Provides

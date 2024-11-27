@@ -3,23 +3,33 @@ package com.tisenres.yandextodoapp.presentation.main
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.compose.*
+import com.tisenres.yandextodoapp.app.YandexTodoApp
 import com.tisenres.yandextodoapp.presentation.theme.YandexTodoAppTheme
-import dagger.hilt.android.AndroidEntryPoint
-
-@AndroidEntryPoint
+import javax.inject.Inject
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        (application as YandexTodoApp).appComponent.inject(this)
         super.onCreate(savedInstanceState)
 
-        enableEdgeToEdge()
-
         setContent {
-            YandexTodoAppTheme {
-                val navController = rememberNavController()
-                MainNavHost(navController = navController)
+            CompositionLocalProvider(LocalViewModelFactory provides viewModelFactory) {
+                YandexTodoAppTheme {
+                    val navController = rememberNavController()
+                    MainNavHost(navController = navController)
+                }
             }
         }
     }
+}
+
+val LocalViewModelFactory = staticCompositionLocalOf<ViewModelProvider.Factory> {
+    error("No ViewModelFactory provided")
 }

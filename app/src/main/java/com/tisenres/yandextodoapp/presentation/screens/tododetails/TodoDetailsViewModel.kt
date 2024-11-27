@@ -10,7 +10,6 @@ import com.tisenres.yandextodoapp.domain.usecases.CreateTodoUseCase
 import com.tisenres.yandextodoapp.domain.usecases.DeleteTodoUseCase
 import com.tisenres.yandextodoapp.domain.usecases.GetTodoItemUseCase
 import com.tisenres.yandextodoapp.domain.usecases.UpdateTodoUseCase
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -23,7 +22,6 @@ import kotlinx.coroutines.withContext
 import java.util.*
 import javax.inject.Inject
 
-@HiltViewModel
 class TodoDetailsViewModel @Inject constructor(
     private val getTodoItemUseCase: GetTodoItemUseCase,
     private val createTodoUseCase: CreateTodoUseCase,
@@ -83,8 +81,8 @@ class TodoDetailsViewModel @Inject constructor(
         }
     }
 
-    fun updateTodoAsync(todoId: String, text: String, importance: Importance, deadline: Date?): Deferred<Unit> {
-        return viewModelScope.async {
+    suspend fun updateTodoAsync(todoId: String, text: String, importance: Importance, deadline: Date?) {
+        viewModelScope.launch {
             _isLoading.value = true
             try {
                 withContext(Dispatchers.IO) {

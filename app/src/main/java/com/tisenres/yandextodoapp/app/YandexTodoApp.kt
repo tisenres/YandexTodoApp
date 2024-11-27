@@ -1,7 +1,18 @@
 package com.tisenres.yandextodoapp.app
 
 import android.app.Application
-import dagger.hilt.android.HiltAndroidApp
+import com.tisenres.yandextodoapp.di.AppComponent
+import com.tisenres.yandextodoapp.di.DaggerAppComponent
 
-@HiltAndroidApp
-class YandexTodoApp: Application()
+class YandexTodoApp : Application() {
+
+    lateinit var appComponent: AppComponent
+
+    override fun onCreate() {
+        super.onCreate()
+
+        appComponent = DaggerAppComponent.builder()
+            .application(this)
+            .build()
+    }
+}
