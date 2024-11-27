@@ -5,19 +5,24 @@ import androidx.lifecycle.ViewModelProvider
 import com.tisenres.yandextodoapp.di.ViewModelKey
 import com.tisenres.yandextodoapp.di.scopes.TodoDetailsScope
 import com.tisenres.yandextodoapp.presentation.screens.tododetails.TodoDetailsViewModel
-import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoMap
+import dagger.Provides
+import javax.inject.Provider
 
 @Module
-abstract class TodoDetailsModule {
+class TodoDetailsModule {
 
-    @Binds
+    @Provides
     @IntoMap
     @ViewModelKey(TodoDetailsViewModel::class)
-    abstract fun bindTodoDetailsViewModel(viewModel: TodoDetailsViewModel): ViewModel
+    fun provideTodoDetailsViewModel(viewModel: TodoDetailsViewModel): ViewModel = viewModel
 
-    @Binds
+    @Provides
     @TodoDetailsScope
-    abstract fun bindViewModelFactory(factory: ViewModelFactory): ViewModelProvider.Factory
+    fun provideViewModelFactory(
+        creators: Map<Class<out ViewModel>, @JvmSuppressWildcards Provider<ViewModel>>
+    ): ViewModelProvider.Factory {
+        return ViewModelFactory(creators)
+    }
 }

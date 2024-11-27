@@ -11,6 +11,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.tisenres.yandextodoapp.di.components.LocalTodoDetailsComponent
 import com.tisenres.yandextodoapp.di.components.LocalTodoListComponent
 import com.tisenres.yandextodoapp.presentation.screens.tododetails.TodoDetailsScreen
 import com.tisenres.yandextodoapp.presentation.screens.tododetails.TodoDetailsViewModel
@@ -52,10 +53,10 @@ fun MainNavHost(
         ) { backStackEntry ->
             val todoId = backStackEntry.arguments?.getString("todoId") ?: return@composable
 
-            val detailsComponent = LocalTodoListComponent.current
+            val detailsComponent = LocalTodoDetailsComponent.current
             val viewModelFactory = detailsComponent.viewModelFactory()
             val viewModel = ViewModelProvider(
-                backStackEntry,
+                LocalViewModelStoreOwner.current!!,
                 viewModelFactory
             ).get(TodoDetailsViewModel::class.java)
 
@@ -82,10 +83,10 @@ fun MainNavHost(
         }
 
         composable(Screen.CreateTodo.route) { backStackEntry ->
-            val detailsComponent = LocalTodoListComponent.current
+            val detailsComponent = LocalTodoDetailsComponent.current
             val viewModelFactory = detailsComponent.viewModelFactory()
             val viewModel = ViewModelProvider(
-                backStackEntry,
+                LocalViewModelStoreOwner.current!!,
                 viewModelFactory
             ).get(TodoDetailsViewModel::class.java)
 
