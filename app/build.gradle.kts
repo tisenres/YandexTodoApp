@@ -92,12 +92,7 @@ dependencies {
     // Font support
     implementation(libs.text.google.fonts)
 
-    // Dependency injection with Hilt
-//    implementation(libs.hilt)
-//    kapt(libs.hiltCompilerAndroid)
-
-
-     // Image loading with Coil
+    // Image loading with Coil
     implementation(libs.coil)
 
     // Networking with Retrofit and OkHttp
@@ -125,20 +120,8 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
 
     // Dagger 2 and Hilt
-
     implementation(libs.dagger)
     kapt(libs.dagger.compiler)
-
-//    ksp(libs.dagger.compiler)
-//    implementation(libs.dagger)
-//    ksp(libs.hiltCompiler)
-
-//    implementation(libs.hiltNavigationCompose)
-//    androidTestImplementation(libs.hiltAndroidTesting)
-//    kspAndroidTest(libs.hiltCompiler)
-//    testImplementation(libs.hiltAndroidTesting)
-//    kspTest(libs.hiltCompiler)
-//    ksp(libs.hiltCompiler)
 }
 
 
