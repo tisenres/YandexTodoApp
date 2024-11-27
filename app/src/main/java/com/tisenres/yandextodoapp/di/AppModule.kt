@@ -1,7 +1,8 @@
 package com.tisenres.yandextodoapp.di
 
 import android.content.Context
-import com.tisenres.yandextodoapp.data.local.preference.AppPreference
+import com.tisenres.yandextodoapp.data.local.preference.AppPreferences
+import com.tisenres.yandextodoapp.presentation.main.NetworkChecker
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,7 +16,13 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideAppPreference(@ApplicationContext context: Context): AppPreference {
-        return AppPreference(context)
+    fun provideAppPreferences(@ApplicationContext context: Context): AppPreferences {
+        return AppPreferences(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideNetworkChecker(@ApplicationContext context: Context): NetworkChecker {
+        return NetworkChecker(context)
     }
 }

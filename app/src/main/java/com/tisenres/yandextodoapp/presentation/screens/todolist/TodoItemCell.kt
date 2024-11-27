@@ -26,27 +26,33 @@ fun TodoItemCell(
     importance: Importance,
     isCompleted: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    onClick: (String) -> Unit
+    onItemClick: (String) -> Unit,
 ) {
     val checkboxColor = when {
         isCompleted -> LocalExtendedColors.current.green
         importance == Importance.HIGH -> LocalExtendedColors.current.red
         else -> LocalExtendedColors.current.supportSeparator
     }
-    val textColor = if (isCompleted) LocalExtendedColors.current.tertiaryLabel else LocalExtendedColors.current.primaryLabel
+    val textColor = if (isCompleted) {
+        LocalExtendedColors.current.tertiaryLabel
+    } else {
+        LocalExtendedColors.current.primaryLabel
+    }
     val textDecoration = if (isCompleted) TextDecoration.LineThrough else null
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = { onClick(text) })
+            .clickable(onClick = { onItemClick(text) })
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .animateContentSize(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Checkbox(
             checked = isCompleted,
-            onCheckedChange = onCheckedChange,
+            onCheckedChange = { checked ->
+                onCheckedChange(checked)
+            },
             modifier = Modifier
                 .padding(end = 12.dp),
             colors = CheckboxDefaults.colors(
@@ -70,6 +76,7 @@ fun TodoItemCell(
                         modifier = Modifier.padding(end = 7.dp)
                     )
                 }
+
                 Importance.LOW -> {
                     Icon(
                         painter = painterResource(R.drawable.priority_low),
@@ -78,6 +85,7 @@ fun TodoItemCell(
                         modifier = Modifier.padding(end = 7.dp)
                     )
                 }
+
                 else -> {}
             }
 
@@ -87,7 +95,8 @@ fun TodoItemCell(
                 color = textColor,
                 textDecoration = textDecoration,
                 maxLines = 3,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(end = 7.dp)
             )
         }
 

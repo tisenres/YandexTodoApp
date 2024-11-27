@@ -1,7 +1,6 @@
 package com.tisenres.yandextodoapp.di
 
 import com.tisenres.yandextodoapp.BuildConfig
-import com.tisenres.yandextodoapp.data.local.preference.AppPreference
 import com.tisenres.yandextodoapp.data.remote.TodoApiService
 import com.tisenres.yandextodoapp.data.remote.interceptors.ErrorHandlingInterceptor
 import com.tisenres.yandextodoapp.data.remote.interceptors.HeaderInterceptor
@@ -29,10 +28,10 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideHeaderInterceptor(preferences: AppPreference): HeaderInterceptor {
+    fun provideHeaderInterceptor(
+    ): HeaderInterceptor {
         return HeaderInterceptor(
-            tokenProvider = { BuildConfig.TOKEN },
-            revisionProvider = { preferences.getCurrentRevision() }
+            tokenProvider = { BuildConfig.TOKEN }
         )
     }
 

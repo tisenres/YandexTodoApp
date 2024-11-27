@@ -11,7 +11,9 @@ import com.tisenres.yandextodoapp.domain.usecases.DeleteTodoUseCase
 import com.tisenres.yandextodoapp.domain.usecases.GetTodoItemUseCase
 import com.tisenres.yandextodoapp.domain.usecases.UpdateTodoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,6 +35,7 @@ class TodoDetailsViewModel @Inject constructor(
     val todo: StateFlow<TodoItem?> = _todo.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
@@ -49,44 +52,39 @@ class TodoDetailsViewModel @Inject constructor(
             } catch (e: BadRequestException) {
                 _errorMessage.value = "Bad Request: ${e.message}"
             } catch (e: Exception) {
-                Log.e("TodoDetailsViewModel", "Error fetching todo by id", e)
                 _errorMessage.value = "Something went wrong"
-            } finally {
+            }
+            finally {
                 _isLoading.value = false
             }
         }
     }
 
-    fun createTodo(text: String, importance: Importance, deadline: Date?) {
-        viewModelScope.launch {
+    fun createTodoAsync(text: String, importance: Importance, deadline: Date?): Deferred<Unit> {
+        return viewModelScope.async {
             _isLoading.value = true
             try {
-                withContext(Dispatchers.IO) {
-                    createTodoUseCase(
-                        TodoItem(
-                            id = UUID.randomUUID().toString(),
-                            text = text,
-                            importance = importance,
-                            deadline = deadline,
-                            isCompleted = false,
-                            createdAt = Date(),
-                            modifiedAt = null
-                        )
+                createTodoUseCase(
+                    TodoItem(
+                        id = UUID.randomUUID().toString(),
+                        text = text,
+                        importance = importance,
+                        deadline = deadline,
+                        isCompleted = false,
+                        createdAt = Date(),
+                        modifiedAt = null
                     )
-                }
+                )
             } catch (e: BadRequestException) {
                 _errorMessage.value = "Bad Request: ${e.message}"
             } catch (e: Exception) {
-                Log.e("TodoDetailsViewModel", "Error creating todo", e)
                 _errorMessage.value = "Something went wrong"
-            } finally {
-                _isLoading.value = false
             }
         }
     }
 
-    fun updateTodo(todoId: String, text: String, importance: Importance, deadline: Date?) {
-        viewModelScope.launch {
+    fun updateTodoAsync(todoId: String, text: String, importance: Importance, deadline: Date?): Deferred<Unit> {
+        return viewModelScope.async {
             _isLoading.value = true
             try {
                 withContext(Dispatchers.IO) {
@@ -104,16 +102,13 @@ class TodoDetailsViewModel @Inject constructor(
             } catch (e: BadRequestException) {
                 _errorMessage.value = "Bad Request: ${e.message}"
             } catch (e: Exception) {
-                Log.e("TodoDetailsViewModel", "Error updating todo", e)
                 _errorMessage.value = "Something went wrong"
-            } finally {
-                _isLoading.value = false
             }
         }
     }
 
-    fun deleteTodo(todoId: String) {
-        viewModelScope.launch {
+    fun deleteTodoAsync(todoId: String): Deferred<Unit> {
+        return viewModelScope.async {
             _isLoading.value = true
             try {
                 withContext(Dispatchers.IO) {
@@ -122,10 +117,7 @@ class TodoDetailsViewModel @Inject constructor(
             } catch (e: BadRequestException) {
                 _errorMessage.value = "Bad Request: ${e.message}"
             } catch (e: Exception) {
-                Log.e("TodoDetailsViewModel", "Error deleting todo", e)
                 _errorMessage.value = "Something went wrong"
-            } finally {
-                _isLoading.value = false
             }
         }
     }

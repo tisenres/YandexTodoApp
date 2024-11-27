@@ -1,8 +1,5 @@
 package com.tisenres.yandextodoapp.presentation.screens.todolist
 
-import android.content.Context
-import android.net.ConnectivityManager
-import android.net.Network
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,23 +20,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.tisenres.yandextodoapp.R
-import com.tisenres.yandextodoapp.domain.entity.Importance
 import com.tisenres.yandextodoapp.domain.entity.TodoItem
 import com.tisenres.yandextodoapp.presentation.theme.LocalExtendedColors
-import java.util.Date
 
 @Composable
 fun TodoListScreen(
     viewModel: TodoListViewModel = hiltViewModel(),
-    onTodoClick: (String, String) -> Unit,
+    onTodoItemClick: (String) -> Unit,
     onCreateTodoClick: () -> Unit
 ) {
     val todos by viewModel.todos.collectAsState()
@@ -47,43 +40,21 @@ fun TodoListScreen(
     val errorMessage by viewModel.errorMessage.collectAsState()
     val isError by viewModel.isError.collectAsState()
 
+    val onShowCompletedTasks by viewModel.onShowCompletedTasks.collectAsState()
+
     val snackbarHostState = remember { SnackbarHostState() }
     rememberCoroutineScope()
 
     LaunchedEffect(errorMessage) {
-        errorMessage?.let {
-            snackbarHostState.showSnackbar(
-                message = it,
-                duration = SnackbarDuration.Short
-            )
+        errorMessage?.let { message ->
+            snackbarHostState.showSnackbar(message = message, duration = SnackbarDuration.Short)
             viewModel.clearErrorMessage()
-        }
-    }
-
-    val context = LocalContext.current
-    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-    val isConnected = remember { mutableStateOf(true) }
-
-    DisposableEffect(Unit) {
-        val networkCallback = object : ConnectivityManager.NetworkCallback() {
-            override fun onAvailable(network: Network) {
-                isConnected.value = true
-                viewModel.refreshTodosWithRetry()
-            }
-
-            override fun onLost(network: Network) {
-                isConnected.value = false
-            }
-        }
-        connectivityManager.registerDefaultNetworkCallback(networkCallback)
-        onDispose {
-            connectivityManager.unregisterNetworkCallback(networkCallback)
         }
     }
 
     TodoListContent(
         todos = todos,
-        onTodoClick = onTodoClick,
+        onTodoItemClick = onTodoItemClick,
         onCreateTodoClick = onCreateTodoClick,
         onCompleteTodo = { todoId -> viewModel.completeTodo(todoId) },
         onDeleteTodo = { todoId -> viewModel.deleteTodo(todoId) },
@@ -92,6 +63,7 @@ fun TodoListScreen(
         onRetryClick = { viewModel.refreshTodosWithRetry() },
         snackbarHostState = snackbarHostState,
         modifier = Modifier.fillMaxSize(),
+        onShowCompletedTasks = onShowCompletedTasks,
         viewModel = viewModel
     )
 }
@@ -99,10 +71,11 @@ fun TodoListScreen(
 @Composable
 fun TodoListContent(
     todos: List<TodoItem>,
-    onTodoClick: (String, String) -> Unit,
+    onTodoItemClick: (String) -> Unit,
     onCreateTodoClick: () -> Unit,
     onCompleteTodo: (String) -> Unit,
     onDeleteTodo: (String) -> Unit,
+    onShowCompletedTasks: Boolean,
     isLoading: Boolean,
     isError: Boolean,
     onRetryClick: () -> Unit,
@@ -110,6 +83,15 @@ fun TodoListContent(
     modifier: Modifier = Modifier,
     viewModel: TodoListViewModel
 ) {
+
+    val filteredTodos = remember(onShowCompletedTasks, todos) {
+        if (onShowCompletedTasks) {
+            todos
+        } else {
+            todos.filter { !it.isCompleted }
+        }
+    }
+
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
@@ -171,14 +153,14 @@ fun TodoListContent(
                 ) {
                     HeaderAndCompletedTodos(
                         completedTodos = todos.count { it.isCompleted },
-                        onEyeClick = {}
+                        onEyeClick = { viewModel.toggleEyeButton() }
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
                     TodoList(
-                        todos = todos,
-                        onTodoClick = onTodoClick,
+                        todos = filteredTodos,
+                        onTodoItemClick = onTodoItemClick,
                         onCompleteTodo = onCompleteTodo,
                         onCreateTodoClick = onCreateTodoClick,
                         onDeleteTodo = onDeleteTodo,
@@ -207,7 +189,7 @@ fun HeaderAndCompletedTodos(
             .padding(start = 60.dp, top = 50.dp, end = 24.dp)
     ) {
         Text(
-            text = "Мои дела",
+            text = stringResource(R.string.my_todos),
             style = MaterialTheme.typography.titleLarge,
             color = LocalExtendedColors.current.primaryLabel
         )
@@ -219,15 +201,15 @@ fun HeaderAndCompletedTodos(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "Выполнено — $completedTodos",
+                text = stringResource(R.string.completed) + " — $completedTodos",
                 style = MaterialTheme.typography.bodySmall,
                 color = LocalExtendedColors.current.tertiaryLabel,
             )
             Spacer(modifier = Modifier.weight(1f))
             Icon(
-                painter = painterResource(if (isVisible) R.drawable.visibility else R.drawable.visibility_off),
+                painter = painterResource(if (!isVisible) R.drawable.visibility else R.drawable.visibility_off),
                 tint = LocalExtendedColors.current.blue,
-                contentDescription = if (isVisible) "Hide Completed Todos" else "Show Completed Todos",
+                contentDescription = if (!isVisible) "Hide Completed Todos" else "Show Completed Todos",
                 modifier = Modifier
                     .size(24.dp)
                     .clip(CircleShape)
@@ -244,7 +226,7 @@ fun HeaderAndCompletedTodos(
 @Composable
 fun TodoList(
     todos: List<TodoItem>,
-    onTodoClick: (String, String) -> Unit,
+    onTodoItemClick: (String) -> Unit,
     onCompleteTodo: (String) -> Unit,
     onCreateTodoClick: () -> Unit,
     onDeleteTodo: (String) -> Unit,
@@ -257,19 +239,20 @@ fun TodoList(
 
     PullToRefreshBox(
         state = pullRefreshState,
-        onRefresh = { viewModel.refreshTodosWithRetry() },
+        onRefresh = {
+            if (!isLoading) viewModel.refreshTodosWithRetry()
+        },
         isRefreshing = isLoading,
         indicator = {
             PullToRefreshDefaults.Indicator(
                 state = pullRefreshState,
                 isRefreshing = isLoading,
-                color = Color(0xFF32B768),
+                color = LocalExtendedColors.current.green,
                 containerColor = Color.White,
                 modifier = Modifier.align(Alignment.TopCenter)
             )
         }
     ) {
-
         LazyColumn(
             contentPadding = PaddingValues(vertical = 8.dp),
             modifier = modifier
@@ -331,10 +314,10 @@ fun TodoList(
                             text = item.text,
                             importance = item.importance,
                             isCompleted = item.isCompleted,
-                            onClick = { text -> onTodoClick(item.id, text) },
-                            onCheckedChange = { checked ->
+                            onItemClick = { onTodoItemClick(item.id) },
+                            onCheckedChange = {
                                 onCompleteTodo(item.id)
-                            }
+                            },
                         )
                     }
                 )
@@ -343,6 +326,7 @@ fun TodoList(
                     SwipeToDismissBoxValue.EndToStart -> {
                         LaunchedEffect(Unit) {
                             onDeleteTodo(item.id)
+                            swipeState.snapTo(SwipeToDismissBoxValue.Settled)
                         }
                     }
 
@@ -376,101 +360,11 @@ fun newTaskRow(onCreateTodoClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = "Новое",
+            text = stringResource(R.string.new_todo),
             style = MaterialTheme.typography.bodyLarge,
             color = LocalExtendedColors.current.tertiaryLabel,
             maxLines = 3,
             overflow = TextOverflow.Ellipsis,
         )
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun HeaderAndCompletedTodosPreview() {
-    HeaderAndCompletedTodos(
-        completedTodos = 5,
-        onEyeClick = {}
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun NewTaskRowPreview() {
-    newTaskRow(onCreateTodoClick = {})
-}
-
-@Preview(showBackground = true)
-@Composable
-fun TodoListPreview() {
-    val sampleTodos = listOf(
-        TodoItem(
-            id = "1",
-            text = "Задача 1",
-            importance = Importance.NORMAL,
-            isCompleted = false,
-            createdAt = Date()
-        ),
-        TodoItem(
-            id = "2",
-            text = "Задача 2",
-            importance = Importance.HIGH,
-            isCompleted = true,
-            createdAt = Date()
-        ),
-        TodoItem(
-            id = "3",
-            text = "Задача 3",
-            importance = Importance.LOW,
-            isCompleted = false,
-            createdAt = Date()
-        )
-    )
-    TodoList(
-        todos = sampleTodos,
-        onTodoClick = { _, _ -> },
-        onCompleteTodo = {},
-        onCreateTodoClick = {},
-        onDeleteTodo = {},
-        modifier = Modifier,
-        isLoading = false,
-        viewModel = hiltViewModel()
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun TodoListContentPreview() {
-    val sampleTodos = listOf(
-        TodoItem(
-            id = "1",
-            text = "Задача 1",
-            importance = Importance.NORMAL,
-            isCompleted = false,
-            createdAt = Date()
-        ),
-        TodoItem(
-            id = "2",
-            text = "Задача 2",
-            importance = Importance.HIGH,
-            isCompleted = true,
-            createdAt = Date()
-        ),
-        TodoItem(
-            id = "3",
-            text = "Задача 3",
-            importance = Importance.LOW,
-            isCompleted = false,
-            createdAt = Date()
-        )
-    )
-//    TodoListContent(
-//        todos = sampleTodos,
-//        onTodoClick = { _, _ -> },
-//        onCreateTodoClick = {},
-//        onCompleteTodo = {},
-//        onDeleteTodo = {},
-//        isLoading = true,
-//        viewModel = hiltViewModel()
-//    )
 }
