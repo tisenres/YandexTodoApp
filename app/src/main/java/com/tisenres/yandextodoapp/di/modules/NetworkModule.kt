@@ -1,4 +1,4 @@
-package com.tisenres.yandextodoapp.di
+package com.tisenres.yandextodoapp.di.modules
 
 import com.tisenres.yandextodoapp.BuildConfig
 import com.tisenres.yandextodoapp.data.remote.TodoApiService
@@ -13,7 +13,7 @@ import dagger.Provides
 import javax.inject.Singleton
 
 @Module
-class NetworkModule {
+object NetworkModule {
 
     @Provides
     @Singleton

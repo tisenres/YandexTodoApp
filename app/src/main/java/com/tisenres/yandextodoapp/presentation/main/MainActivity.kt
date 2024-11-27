@@ -4,23 +4,34 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.compose.*
+import androidx.navigation.compose.rememberNavController
 import com.tisenres.yandextodoapp.app.YandexTodoApp
+import com.tisenres.yandextodoapp.di.components.AppComponent
+import com.tisenres.yandextodoapp.di.components.LocalTodoDetailsComponent
+import com.tisenres.yandextodoapp.di.components.LocalTodoListComponent
+import com.tisenres.yandextodoapp.di.components.TodoDetailsComponent
+import com.tisenres.yandextodoapp.di.components.TodoListComponent
 import com.tisenres.yandextodoapp.presentation.theme.YandexTodoAppTheme
-import javax.inject.Inject
+
 class MainActivity : ComponentActivity() {
 
-    @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
+    private lateinit var appComponent: AppComponent
+    private lateinit var listComponent: TodoListComponent
+    private lateinit var detailsComponent: TodoDetailsComponent
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        (application as YandexTodoApp).appComponent.inject(this)
         super.onCreate(savedInstanceState)
+        appComponent = (application as YandexTodoApp).appComponent
+        appComponent.inject(this)
+
+        listComponent = appComponent.listComponent().create()
+        detailsComponent = appComponent.detailsComponent().create()
 
         setContent {
-            CompositionLocalProvider(LocalViewModelFactory provides viewModelFactory) {
+            CompositionLocalProvider(
+                LocalTodoListComponent provides listComponent,
+                LocalTodoDetailsComponent provides detailsComponent
+            ) {
                 YandexTodoAppTheme {
                     val navController = rememberNavController()
                     MainNavHost(navController = navController)
@@ -28,8 +39,4 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
-
-val LocalViewModelFactory = staticCompositionLocalOf<ViewModelProvider.Factory> {
-    error("No ViewModelFactory provided")
 }

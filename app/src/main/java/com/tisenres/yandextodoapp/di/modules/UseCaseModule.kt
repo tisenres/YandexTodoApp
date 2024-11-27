@@ -1,4 +1,4 @@
-package com.tisenres.yandextodoapp.di
+package com.tisenres.yandextodoapp.di.modules
 
 import com.tisenres.yandextodoapp.domain.repository.TodoItemsLocalRepository
 import com.tisenres.yandextodoapp.domain.repository.TodoItemsRemoteRepository

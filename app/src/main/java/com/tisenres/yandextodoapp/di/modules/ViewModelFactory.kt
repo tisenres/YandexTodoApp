@@ -1,4 +1,4 @@
-package com.tisenres.yandextodoapp.di
+package com.tisenres.yandextodoapp.di.modules
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

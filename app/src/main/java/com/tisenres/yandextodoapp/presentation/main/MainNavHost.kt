@@ -5,14 +5,16 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.tisenres.yandextodoapp.presentation.screens.todolist.TodoListScreen
+import com.tisenres.yandextodoapp.di.components.LocalTodoListComponent
 import com.tisenres.yandextodoapp.presentation.screens.tododetails.TodoDetailsScreen
 import com.tisenres.yandextodoapp.presentation.screens.tododetails.TodoDetailsViewModel
+import com.tisenres.yandextodoapp.presentation.screens.todolist.TodoListScreen
 import com.tisenres.yandextodoapp.presentation.screens.todolist.TodoListViewModel
 import kotlinx.coroutines.launch
 
@@ -21,16 +23,17 @@ fun MainNavHost(
     navController: NavHostController,
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current
 ) {
-
-    val viewModelFactory = LocalViewModelFactory.current
-
     NavHost(
         navController = navController,
-        startDestination = "todoList"
+        startDestination = Screen.TodoList.route
     ) {
         composable(Screen.TodoList.route) {
-
-            val todoListViewModel = viewModelFactory.create(TodoListViewModel::class.java)
+            val listComponent = LocalTodoListComponent.current
+            val viewModelFactory = listComponent.viewModelFactory()
+            val todoListViewModel = ViewModelProvider(
+                LocalViewModelStoreOwner.current!!,
+                viewModelFactory
+            ).get(TodoListViewModel::class.java)
 
             TodoListScreen(
                 viewModel = todoListViewModel,
@@ -49,6 +52,8 @@ fun MainNavHost(
         ) { backStackEntry ->
             val todoId = backStackEntry.arguments?.getString("todoId") ?: return@composable
 
+            val detailsComponent = LocalTodoListComponent.current
+            val viewModelFactory = detailsComponent.viewModelFactory()
             val viewModel = ViewModelProvider(
                 backStackEntry,
                 viewModelFactory
@@ -77,10 +82,10 @@ fun MainNavHost(
         }
 
         composable(Screen.CreateTodo.route) { backStackEntry ->
-
-            val viewModelStoreOwner = backStackEntry
+            val detailsComponent = LocalTodoListComponent.current
+            val viewModelFactory = detailsComponent.viewModelFactory()
             val viewModel = ViewModelProvider(
-                viewModelStoreOwner,
+                backStackEntry,
                 viewModelFactory
             ).get(TodoDetailsViewModel::class.java)
 
