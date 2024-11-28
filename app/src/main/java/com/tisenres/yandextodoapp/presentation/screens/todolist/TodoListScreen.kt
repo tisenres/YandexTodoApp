@@ -24,14 +24,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.tisenres.yandextodoapp.R
 import com.tisenres.yandextodoapp.domain.entity.TodoItem
 import com.tisenres.yandextodoapp.presentation.theme.LocalExtendedColors
 
 @Composable
 fun TodoListScreen(
-    viewModel: TodoListViewModel = hiltViewModel(),
+    viewModel: TodoListViewModel,
     onTodoItemClick: (String) -> Unit,
     onCreateTodoClick: () -> Unit
 ) {

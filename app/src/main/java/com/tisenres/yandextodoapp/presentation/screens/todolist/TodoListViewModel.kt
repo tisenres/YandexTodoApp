@@ -8,7 +8,6 @@ import com.tisenres.yandextodoapp.domain.usecases.DeleteTodoUseCase
 import com.tisenres.yandextodoapp.domain.usecases.GetTodosUseCase
 import com.tisenres.yandextodoapp.domain.usecases.UpdateTodoUseCase
 import com.tisenres.yandextodoapp.presentation.main.NetworkChecker
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
@@ -20,7 +19,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-@HiltViewModel
 class TodoListViewModel @Inject constructor(
     private val getTodosUseCase: GetTodosUseCase,
     private val updateTodoUseCase: UpdateTodoUseCase,

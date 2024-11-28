@@ -1,7 +1,17 @@
 package com.tisenres.yandextodoapp.app
 
 import android.app.Application
-import dagger.hilt.android.HiltAndroidApp
+import com.tisenres.yandextodoapp.di.components.AppComponent
+import com.tisenres.yandextodoapp.di.components.DaggerAppComponent
 
-@HiltAndroidApp
-class YandexTodoApp: Application()
+class YandexTodoApp : Application() {
+
+    val appComponent: AppComponent by lazy {
+        DaggerAppComponent.factory().create(this)
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        appComponent.inject(this)
+    }
+}

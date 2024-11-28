@@ -4,7 +4,6 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.hilt)
     alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.kotlin.ksp)
 }
@@ -93,13 +92,7 @@ dependencies {
     // Font support
     implementation(libs.text.google.fonts)
 
-    // Dependency injection with Hilt
-    implementation(libs.hilt)
-    kapt(libs.hiltCompiler)
-    kapt(libs.hiltCompilerAndroidX)
-    implementation(libs.hiltNavigationCompose)
-
-     // Image loading with Coil
+    // Image loading with Coil
     implementation(libs.coil)
 
     // Networking with Retrofit and OkHttp
@@ -124,14 +117,13 @@ dependencies {
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
 
-    // Hilt Testing
-    androidTestImplementation(libs.hiltAndroidTesting)
-    kaptAndroidTest(libs.hiltCompiler)
-    testImplementation(libs.hiltAndroidTesting)
-    kaptTest(libs.hiltCompiler)
-
     implementation(libs.androidx.work.runtime.ktx)
+
+    // Dagger 2 and Hilt
+    implementation(libs.dagger)
+    kapt(libs.dagger.compiler)
 }
+
 
 kapt {
     correctErrorTypes = true
